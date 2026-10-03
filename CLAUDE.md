@@ -118,15 +118,14 @@ macOS and Windows have no `expo/fetch` and need their own streaming fetch.
 (the renderer must match exactly), so bun prints an "incorrect peer dependency"
 warning. It is expected; do not bump `react` past what RN 0.81 ships.
 
-## Sibling packages (not yet on npm)
+## Sibling packages
 
-`@sudobility/raidr_agent_types`, `@sudobility/raidr_agent_client` and
-`@sudobility/raidr_agent_lib` (all `^0.0.1`, repos in
-`~/projects/raidr_agent_{types,client,lib}`) are **not** in `package.json` yet:
-they are unpublished, and `bun install` (locally and in CI) fails on a 404.
-Add them back to `dependencies` once they are published. Nothing in `src/`
-imports them. The backend is `raidr_agent_api` (port 8040, the
-`VITE_API_URL` default).
+`@sudobility/raidr_agent_types`, `@sudobility/raidr_agent_client`,
+`@sudobility/raidr_agent_lib` (repos in `~/projects/raidr_agent_{types,client,lib}`)
+and `@sudobility/raidr_types` are on npm and in `dependencies`. Releases go
+through `~/projects/raidr_app/scripts/push_all.sh`, which publishes them in
+dependency order before this app. The backend is `raidr_agent_api` (port 8040,
+the `VITE_API_URL` default).
 
 ## Configuration that needs real values
 
