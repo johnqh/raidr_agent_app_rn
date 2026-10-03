@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "back": "Назад"
+  },
+  "settings": {
+    "title": "Настройки",
+    "appearance": "Внешний вид",
+    "theme": {
+      "label": "Тема",
+      "system": "Система",
+      "light": "Свет",
+      "dark": "Темный"
+    },
+    "selectTheme": "Выбрать тему",
+    "themeDescription": "Цветовая схема приложения",
+    "language": "Язык",
+    "languageDescription": "Выберите свой предпочитаемый язык",
+    "account": "Счет",
+    "signInDescription": "Синхронизация данных между устройствами",
+    "about": "О нас",
+    "version": "Версия 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Войти",
+    "signUp": "Зарегистрироваться",
+    "signOut": "Выйти",
+    "signOutConfirm": "Вы уверены, что хотите выйти?",
+    "email": "Электронная почта",
+    "password": "Пароль",
+    "error": "Произошла ошибка",
+    "guest": "Гость",
+    "signedIn": "Вошёл в систему",
+    "createAccount": "Создать учетную запись",
+    "createAccountDescription": "Сохраните свои данные и синхронизируйте их между устройствами",
+    "missingFields": "Пожалуйста, заполните все поля",
+    "orContinueWith": "Или продолжить с",
+    "signInWithGoogle": "Войти через Google",
+    "signInWithApple": "Войти через Apple",
+    "alreadyHaveAccount": "Уже есть аккаунт?",
+    "dontHaveAccount": "Нет аккаунта?",
+    "forgotPassword": "Забыли пароль?",
+    "resetPasswordHint": "Введите адрес электронной почты, и мы отправим ссылку для сброса пароля.",
+    "sendResetLink": "Отправить ссылку",
+    "resetEmailSent": "Если этот адрес привязан к аккаунту, ссылка для сброса пароля уже отправлена. Проверьте почту.",
+    "backToSignIn": "Вернуться ко входу",
+    "missingEmail": "Введите адрес электронной почты.",
+    "signInToAccount": "Войдите в свой аккаунт",
+    "resetPassword": "Сброс пароля",
+    "close": "Закрыть"
+  },
+  "tabs": {
+    "histories": "Истории",
+    "settings": "Настройки"
+  }
+}

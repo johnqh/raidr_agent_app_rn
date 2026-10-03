@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Lade... ",
+    "error": "Fehler",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "back": "Zurück"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "appearance": "Aussehen",
+    "theme": {
+      "label": "Thema",
+      "system": "System",
+      "light": "Licht",
+      "dark": "Dunkel"
+    },
+    "selectTheme": "Thema auswählen",
+    "themeDescription": "App-Farbschema",
+    "language": "Sprache",
+    "languageDescription": "Wählen Sie Ihre bevorzugte Sprache",
+    "account": "Konto",
+    "signInDescription": "Daten zwischen Geräten synchronisieren",
+    "about": "Über",
+    "version": "Version 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "signOut": "Abmelden",
+    "signOutConfirm": "Sind Sie sicher, dass Sie sich abmelden möchten?",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "error": "Ein Fehler ist aufgetreten",
+    "guest": "Gast",
+    "signedIn": "Angemeldet",
+    "createAccount": "Konto erstellen",
+    "createAccountDescription": "Speichern Sie Ihre Daten und synchronisieren Sie sie über Geräte",
+    "missingFields": "Bitte füllen Sie alle Felder aus",
+    "orContinueWith": "Oder weiter mit",
+    "signInWithGoogle": "Mit Google anmelden",
+    "signInWithApple": "Mit Apple anmelden",
+    "alreadyHaveAccount": "Bereits ein Konto?",
+    "dontHaveAccount": "Noch kein Konto?",
+    "forgotPassword": "Passwort vergessen?",
+    "resetPasswordHint": "Geben Sie Ihre E-Mail-Adresse ein, und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.",
+    "sendResetLink": "Link zum Zurücksetzen senden",
+    "resetEmailSent": "Falls ein Konto diese Adresse verwendet, ist ein Link zum Zurücksetzen des Passworts unterwegs. Prüfen Sie Ihre E-Mails.",
+    "backToSignIn": "Zurück zur Anmeldung",
+    "missingEmail": "Geben Sie Ihre E-Mail-Adresse ein.",
+    "signInToAccount": "Bei Ihrem Konto anmelden",
+    "resetPassword": "Passwort zurücksetzen",
+    "close": "Schließen"
+  },
+  "tabs": {
+    "histories": "Geschichten",
+    "settings": "Einstellungen"
+  }
+}

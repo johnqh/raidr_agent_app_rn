@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "กำลังโหลด...",
+    "error": "ข้อผิดพลาด",
+    "cancel": "ยกเลิก",
+    "delete": "ลบ",
+    "back": "ย้อนกลับ"
+  },
+  "settings": {
+    "title": "การตั้งค่า",
+    "appearance": "รูปลักษณ์",
+    "theme": {
+      "label": "หัวข้อ",
+      "system": "ระบบ",
+      "light": "แสง",
+      "dark": "มืด"
+    },
+    "selectTheme": "เลือกธีม",
+    "themeDescription": "รูปแบบสีของแอปพลิเคชัน",
+    "language": "ภาษา",
+    "languageDescription": "เลือกภาษาที่คุณต้องการ",
+    "account": "บัญชี",
+    "signInDescription": "ซิงค์ข้อมูลระหว่างอุปกรณ์",
+    "about": "เกี่ยวกับ",
+    "version": "เวอร์ชัน 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "เข้าสู่ระบบ",
+    "signUp": "สมัครสมาชิก",
+    "signOut": "ออกจากระบบ",
+    "signOutConfirm": "คุณแน่ใจหรือว่าต้องการออกจากระบบ?",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "error": "เกิดข้อผิดพลาด",
+    "guest": "แขก",
+    "signedIn": "เข้าสู่ระบบแล้ว",
+    "createAccount": "สร้างบัญชี",
+    "createAccountDescription": "บันทึกข้อมูลของคุณและซิงค์ข้ามอุปกรณ์",
+    "missingFields": "กรุณากรอกข้อมูลทุกช่อง",
+    "orContinueWith": "หรือดำเนินการต่อด้วย",
+    "signInWithGoogle": "ลงชื่อเข้าใช้ด้วย Google",
+    "signInWithApple": "ลงชื่อเข้าใช้ด้วย Apple",
+    "alreadyHaveAccount": "มีบัญชีอยู่แล้วใช่ไหม",
+    "dontHaveAccount": "ยังไม่มีบัญชีใช่ไหม",
+    "forgotPassword": "ลืมรหัสผ่านใช่ไหม",
+    "resetPasswordHint": "กรอกอีเมลของคุณ แล้วเราจะส่งลิงก์สำหรับรีเซ็ตรหัสผ่านให้",
+    "sendResetLink": "ส่งลิงก์รีเซ็ต",
+    "resetEmailSent": "หากมีบัญชีที่ใช้อีเมลนี้ เราได้ส่งลิงก์สำหรับรีเซ็ตรหัสผ่านไปแล้ว โปรดตรวจสอบอีเมลของคุณ",
+    "backToSignIn": "กลับไปที่การลงชื่อเข้าใช้",
+    "missingEmail": "กรอกอีเมลของคุณ",
+    "signInToAccount": "ลงชื่อเข้าใช้บัญชีของคุณ",
+    "resetPassword": "รีเซ็ตรหัสผ่าน",
+    "close": "ปิด"
+  },
+  "tabs": {
+    "histories": "ประวัติศาสตร์",
+    "settings": "การตั้งค่า"
+  }
+}

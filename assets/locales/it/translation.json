@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "back": "Indietro"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "appearance": "Aspetto",
+    "theme": {
+      "label": "Tema",
+      "system": "Sistema",
+      "light": "Luce",
+      "dark": "Scuro"
+    },
+    "selectTheme": "Seleziona tema",
+    "themeDescription": "Tema colori dell'app",
+    "language": "Lingua",
+    "languageDescription": "Seleziona la tua lingua preferita",
+    "account": "Account",
+    "signInDescription": "Sincronizza i dati tra i dispositivi",
+    "about": "Informazioni",
+    "version": "Versione 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Accedi",
+    "signUp": "Iscriviti",
+    "signOut": "Esci",
+    "signOutConfirm": "Sei sicuro di voler uscire?",
+    "email": "Posta elettronica",
+    "password": "Password",
+    "error": "Si è verificato un errore",
+    "guest": "Ospite",
+    "signedIn": "Connesso",
+    "createAccount": "Crea un account",
+    "createAccountDescription": "Salva i tuoi dati e sincronizzali tra dispositivi",
+    "missingFields": "Si prega di compilare tutti i campi",
+    "orContinueWith": "Oppure continua con",
+    "signInWithGoogle": "Accedi con Google",
+    "signInWithApple": "Accedi con Apple",
+    "alreadyHaveAccount": "Hai già un account?",
+    "dontHaveAccount": "Non hai un account?",
+    "forgotPassword": "Password dimenticata?",
+    "resetPasswordHint": "Inserisci il tuo indirizzo email e ti invieremo un link per reimpostare la password.",
+    "sendResetLink": "Invia link di reimpostazione",
+    "resetEmailSent": "Se un account usa questo indirizzo, è in arrivo un link per reimpostare la password. Controlla la tua email.",
+    "backToSignIn": "Torna all'accesso",
+    "missingEmail": "Inserisci il tuo indirizzo email.",
+    "signInToAccount": "Accedi al tuo account",
+    "resetPassword": "Reimposta la password",
+    "close": "Chiudi"
+  },
+  "tabs": {
+    "histories": "Storie",
+    "settings": "Impostazioni"
+  }
+}

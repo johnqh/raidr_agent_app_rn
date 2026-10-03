@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "載入中...",
+    "error": "錯誤",
+    "cancel": "取消",
+    "delete": "刪除",
+    "back": "返回"
+  },
+  "settings": {
+    "title": "設定",
+    "appearance": "外觀",
+    "theme": {
+      "label": "主題",
+      "system": "系統",
+      "light": "光",
+      "dark": "黑暗"
+    },
+    "selectTheme": "選擇主題",
+    "themeDescription": "應用配色方案",
+    "language": "語言",
+    "languageDescription": "選擇您偏好的語言",
+    "account": "帳戶",
+    "signInDescription": "在設備之間同步資料",
+    "about": "關於",
+    "version": "版本 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "登入",
+    "signUp": "註冊",
+    "signOut": "登出",
+    "signOutConfirm": "您確定要登出嗎？",
+    "email": "電子郵件",
+    "password": "密碼",
+    "error": "發生錯誤",
+    "guest": "客人",
+    "signedIn": "已登入",
+    "createAccount": "建立帳戶",
+    "createAccountDescription": "儲存您的資料並在裝置間同步",
+    "missingFields": "請填寫所有欄位",
+    "orContinueWith": "或使用以下方式繼續",
+    "signInWithGoogle": "使用 Google 登入",
+    "signInWithApple": "使用 Apple 登入",
+    "alreadyHaveAccount": "已有帳戶？",
+    "dontHaveAccount": "沒有帳戶？",
+    "forgotPassword": "忘記密碼？",
+    "resetPasswordHint": "輸入您的電子郵件地址，我們會寄送重設密碼的連結給您。",
+    "sendResetLink": "寄送重設連結",
+    "resetEmailSent": "如果有帳戶使用該地址，重設密碼的連結已寄出。請查看您的電子郵件。",
+    "backToSignIn": "返回登入",
+    "missingEmail": "請輸入您的電子郵件地址。",
+    "signInToAccount": "登入您的帳戶",
+    "resetPassword": "重設密碼",
+    "close": "關閉"
+  },
+  "tabs": {
+    "histories": "歷史",
+    "settings": "設定"
+  }
+}

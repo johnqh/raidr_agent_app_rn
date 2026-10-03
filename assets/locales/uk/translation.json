@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Завантаження...",
+    "error": "Помилка",
+    "cancel": "Скасувати",
+    "delete": "Видалити",
+    "back": "Назад"
+  },
+  "settings": {
+    "title": "Налаштування",
+    "appearance": "Зовнішній вигляд",
+    "theme": {
+      "label": "Тема",
+      "system": "Система",
+      "light": "Світло",
+      "dark": "Темний"
+    },
+    "selectTheme": "Вибрати тему",
+    "themeDescription": "Кольорова схема додатку",
+    "language": "Мова",
+    "languageDescription": "Виберіть бажану мову",
+    "account": "Облік",
+    "signInDescription": "Синхронізуйте дані між пристроями",
+    "about": "Про нас",
+    "version": "Версія 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Увійти",
+    "signUp": "Зареєструватися",
+    "signOut": "Вийти",
+    "signOutConfirm": "Ви впевнені, що бажаєте вийти?",
+    "email": "Електронна пошта",
+    "password": "Пароль",
+    "error": "Виникла помилка",
+    "guest": "Гість",
+    "signedIn": "Увійшов у систему",
+    "createAccount": "Створити обліковий запис",
+    "createAccountDescription": "Збережіть свої дані та синхронізуйте їх між пристроями",
+    "missingFields": "Будь ласка, заповніть усі поля",
+    "orContinueWith": "Або продовжити з",
+    "signInWithGoogle": "Увійти через Google",
+    "signInWithApple": "Увійти через Apple",
+    "alreadyHaveAccount": "Уже маєте обліковий запис?",
+    "dontHaveAccount": "Немає облікового запису?",
+    "forgotPassword": "Забули пароль?",
+    "resetPasswordHint": "Введіть адресу електронної пошти, і ми надішлемо посилання для скидання пароля.",
+    "sendResetLink": "Надіслати посилання",
+    "resetEmailSent": "Якщо ця адреса належить обліковому запису, посилання для скидання пароля вже надіслано. Перевірте пошту.",
+    "backToSignIn": "Повернутися до входу",
+    "missingEmail": "Введіть адресу електронної пошти.",
+    "signInToAccount": "Увійдіть у свій обліковий запис",
+    "resetPassword": "Скидання пароля",
+    "close": "Закрити"
+  },
+  "tabs": {
+    "histories": "Історії",
+    "settings": "Налаштування"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "RaidrAgent",
+  "displayName": "raidr agent",
+  "expo": {
+    "name": "raidr agent",
+    "slug": "raidr-agent-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sudobility.raidragent"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.sudobility.raidragent"
+    }
+  }
+}

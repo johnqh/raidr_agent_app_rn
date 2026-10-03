@@ -1,0 +1,87 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# native build outputs (keep ios/ and android/ tracked)
+ios/Pods/
+ios/build/
+ios/DerivedData/
+*.xcuserstate
+**/*.xcuserdatad/
+
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+
+# macOS
+macos/Pods/
+macos/build/
+macos/DerivedData/
+
+# Windows
+windows/packages/
+windows/*/Debug/
+windows/*/Release/
+windows/*/ARM64/
+windows/*/x64/
+windows/*/x86/
+windows/*/.vs/
+windows/*/Generated Files/
+windows/*/AutolinkedNativeModules.g.*
+windows/*/packages.lock.json
+*.suo
+*.user
+*.sdf
+*.opensdf
+
+# Claude Code local settings
+.claude/settings.local.json
+.env.local
+
+# Xcode DerivedData build cache
+.deriveddata/
+
+# Build artifacts (xcarchive, IPA, AAB, etc.)
+app_store/builds/
+
+# App Store API keys
+app_store/.keys/
+
+# Generated store screenshots
+app_store/screenshots/

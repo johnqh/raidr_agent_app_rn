@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "back": "Retour"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "appearance": "Apparence",
+    "theme": {
+      "label": "Thème",
+      "system": "Système",
+      "light": "Lumière",
+      "dark": "Sombre"
+    },
+    "selectTheme": "Sélectionner le thème",
+    "themeDescription": "Schéma de couleurs de l'application",
+    "language": "Langue",
+    "languageDescription": "Sélectionnez votre langue préférée",
+    "account": "Compte",
+    "signInDescription": "Synchroniser les données entre les appareils",
+    "about": "À propos",
+    "version": "Version 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se déconnecter",
+    "signOutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
+    "email": "Courriel",
+    "password": "Mot de passe",
+    "error": "Une erreur s'est produite",
+    "guest": "Invité",
+    "signedIn": "Connecté",
+    "createAccount": "Créer un compte",
+    "createAccountDescription": "Enregistrez vos données et synchronisez-les entre appareils",
+    "missingFields": "Veuillez remplir tous les champs",
+    "orContinueWith": "Ou continuer avec",
+    "signInWithGoogle": "Se connecter avec Google",
+    "signInWithApple": "Se connecter avec Apple",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetPasswordHint": "Saisissez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    "sendResetLink": "Envoyer le lien",
+    "resetEmailSent": "Si un compte utilise cette adresse, un lien de réinitialisation du mot de passe est en route. Consultez vos e-mails.",
+    "backToSignIn": "Retour à la connexion",
+    "missingEmail": "Saisissez votre adresse e-mail.",
+    "signInToAccount": "Connectez-vous à votre compte",
+    "resetPassword": "Réinitialiser votre mot de passe",
+    "close": "Fermer"
+  },
+  "tabs": {
+    "histories": "Histoires",
+    "settings": "Paramètres"
+  }
+}

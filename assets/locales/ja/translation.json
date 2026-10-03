@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "back": "戻る"
+  },
+  "settings": {
+    "title": "設定",
+    "appearance": "外観",
+    "theme": {
+      "label": "テーマ",
+      "system": "システム",
+      "light": "光",
+      "dark": "暗い"
+    },
+    "selectTheme": "テーマを選択",
+    "themeDescription": "アプリのカラースキーム",
+    "language": "言語",
+    "languageDescription": "お好みの言語を選択してください",
+    "account": "アカウント",
+    "signInDescription": "デバイス間でデータを同期する",
+    "about": "について",
+    "version": "バージョン 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "ログイン",
+    "signUp": "登録",
+    "signOut": "ログアウト",
+    "signOutConfirm": "ログアウトしてもよろしいですか？",
+    "email": "電子メール",
+    "password": "パスワード",
+    "error": "エラーが発生しました",
+    "guest": "ゲスト",
+    "signedIn": "ログイン済み",
+    "createAccount": "アカウント作成",
+    "createAccountDescription": "データを保存して、デバイス間で同期します",
+    "missingFields": "すべてのフィールドを入力してください",
+    "orContinueWith": "または次の方法で続行",
+    "signInWithGoogle": "Google でサインイン",
+    "signInWithApple": "Apple でサインイン",
+    "alreadyHaveAccount": "アカウントをお持ちですか？",
+    "dontHaveAccount": "アカウントをお持ちでないですか？",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "resetPasswordHint": "メールアドレスを入力してください。パスワードを再設定するリンクをお送りします。",
+    "sendResetLink": "再設定リンクを送信",
+    "resetEmailSent": "このアドレスを使用するアカウントがあれば、パスワード再設定用のリンクを送信しました。メールをご確認ください。",
+    "backToSignIn": "サインインに戻る",
+    "missingEmail": "メールアドレスを入力してください。",
+    "signInToAccount": "アカウントにサインイン",
+    "resetPassword": "パスワードを再設定",
+    "close": "閉じる"
+  },
+  "tabs": {
+    "histories": "歴史",
+    "settings": "設定"
+  }
+}

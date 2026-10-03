@@ -1,0 +1,16 @@
+{
+  "ios": {
+    "iphone_6_9": {
+      "simulator": "iPhone 16 Plus",
+      "runtime": "iOS-18-6",
+      "resolution": "1290x2796"
+    }
+  },
+  "android": {
+    "android_phone": {
+      "emulator": "Pixel_9_Pro_XL",
+      "resolution": "1344x2992",
+      "store_resolution": "1080x1920"
+    }
+  }
+}

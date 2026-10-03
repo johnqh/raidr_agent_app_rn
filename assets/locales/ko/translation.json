@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류",
+    "cancel": "취소",
+    "delete": "삭제",
+    "back": "뒤로"
+  },
+  "settings": {
+    "title": "설정",
+    "appearance": "외관",
+    "theme": {
+      "label": "테마",
+      "system": "시스템",
+      "light": "빛",
+      "dark": "어두운"
+    },
+    "selectTheme": "테마 선택",
+    "themeDescription": "앱 색상 테마",
+    "language": "언어",
+    "languageDescription": "선호하는 언어를 선택하세요",
+    "account": "계정",
+    "signInDescription": "장치 간에 데이터 동기화",
+    "about": "정보",
+    "version": "버전 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "로그인",
+    "signUp": "가입",
+    "signOut": "로그아웃",
+    "signOutConfirm": "로그아웃하시겠습니까?",
+    "email": "이메일",
+    "password": "비밀번호",
+    "error": "오류가 발생했습니다",
+    "guest": "손님",
+    "signedIn": "로그인됨",
+    "createAccount": "계정 만들기",
+    "createAccountDescription": "데이터를 저장하고 장치 간에 동기화합니다",
+    "missingFields": "모든 항목을 입력해 주세요",
+    "orContinueWith": "또는 다음으로 계속",
+    "signInWithGoogle": "Google로 로그인",
+    "signInWithApple": "Apple로 로그인",
+    "alreadyHaveAccount": "이미 계정이 있으신가요?",
+    "dontHaveAccount": "계정이 없으신가요?",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "resetPasswordHint": "이메일 주소를 입력하시면 비밀번호 재설정 링크를 보내드립니다.",
+    "sendResetLink": "재설정 링크 보내기",
+    "resetEmailSent": "해당 주소를 사용하는 계정이 있다면 비밀번호 재설정 링크가 발송되었습니다. 이메일을 확인하세요.",
+    "backToSignIn": "로그인으로 돌아가기",
+    "missingEmail": "이메일 주소를 입력하세요.",
+    "signInToAccount": "계정에 로그인",
+    "resetPassword": "비밀번호 재설정",
+    "close": "닫기"
+  },
+  "tabs": {
+    "histories": "역사",
+    "settings": "설정"
+  }
+}

@@ -1,0 +1,31 @@
+---
+# CI/CD workflow for raidr_agent_app_rn
+#
+# Runs the unified reusable workflow: bun install, `bun run typecheck`,
+# `bun run lint`, `bun run test:unit` (there is no `build` script, so the build
+# step is skipped). This is an app, so npm publishing is always skipped; the
+# NPM_TOKEN secret is only used to install private @sudobility packages.
+
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# The reusable workflow's jobs request the union of these scopes; a caller that
+# grants fewer fails at startup even though the publish/deploy jobs skip.
+permissions:
+  contents: write
+  id-token: write
+  deployments: write
+
+jobs:
+  cicd:
+    uses: johnqh/workflows/.github/workflows/unified-cicd.yml@main
+    with:
+      skip-npm-publish: true
+    secrets: inherit

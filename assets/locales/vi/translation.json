@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "back": "Quay lại"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "appearance": "Ngoại hình",
+    "theme": {
+      "label": "Chủ đề",
+      "system": "Hệ thống",
+      "light": "Ánh sáng",
+      "dark": "Tối"
+    },
+    "selectTheme": "Chọn chủ đề",
+    "themeDescription": "Bộ màu ứng dụng",
+    "language": "Ngôn ngữ",
+    "languageDescription": "Chọn ngôn ngữ yêu thích của bạn",
+    "account": "Tài khoản",
+    "signInDescription": "Đồng bộ hóa dữ liệu giữa các thiết bị",
+    "about": "Về",
+    "version": "Phiên bản 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "signOut": "Đăng xuất",
+    "signOutConfirm": "Bạn có chắc chắn muốn đăng xuất không?",
+    "email": "Thư điện tử",
+    "password": "Mật khẩu",
+    "error": "Đã xảy ra lỗi",
+    "guest": "Khách",
+    "signedIn": "Đã đăng nhập",
+    "createAccount": "Tạo tài khoản",
+    "createAccountDescription": "Lưu dữ liệu của bạn và đồng bộ hóa trên các thiết bị",
+    "missingFields": "Vui lòng điền đầy đủ tất cả các trường",
+    "orContinueWith": "Hoặc tiếp tục với",
+    "signInWithGoogle": "Đăng nhập bằng Google",
+    "signInWithApple": "Đăng nhập bằng Apple",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "dontHaveAccount": "Chưa có tài khoản?",
+    "forgotPassword": "Quên mật khẩu?",
+    "resetPasswordHint": "Nhập địa chỉ email của bạn và chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.",
+    "sendResetLink": "Gửi liên kết đặt lại",
+    "resetEmailSent": "Nếu có tài khoản dùng địa chỉ này, liên kết đặt lại mật khẩu đang được gửi đến. Hãy kiểm tra email của bạn.",
+    "backToSignIn": "Quay lại đăng nhập",
+    "missingEmail": "Nhập địa chỉ email của bạn.",
+    "signInToAccount": "Đăng nhập vào tài khoản của bạn",
+    "resetPassword": "Đặt lại mật khẩu",
+    "close": "Đóng"
+  },
+  "tabs": {
+    "histories": "Lịch sử",
+    "settings": "Cài đặt"
+  }
+}

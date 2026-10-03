@@ -1,0 +1,130 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "back": "Back"
+  },
+  "ask": {
+    "title": "Ask",
+    "heading": "What do you need?",
+    "placeholder": "Describe what you want done, e.g. \"find me a table for two on Friday\"",
+    "go": "Go",
+    "classifying": "Finding the right sites...",
+    "error": "Could not understand that request. Try rephrasing it.",
+    "comingSoon": "Coming soon: raidr agent will pick the right sites, sign you in and stream the results here."
+  },
+  "sites": {
+    "title": "Choose sites",
+    "empty": "No sites can answer that request yet. Go back and try a different one.",
+    "otherLabel": "Other",
+    "tools_one": "{{count}} tool",
+    "tools_other": "{{count}} tools",
+    "auth": {
+      "none": "Open",
+      "required": "Sign-in"
+    },
+    "logIn": "Log in",
+    "signedIn": "Signed in",
+    "next": "Next"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Sign in to {{host}}; the window closes by itself.",
+    "close": "Close",
+    "error": "Could not load sign-in for this site."
+  },
+  "results": {
+    "title": "Results",
+    "progress": "Progress",
+    "answers": "Answers",
+    "calls_one": "{{count}} call",
+    "calls_other": "{{count}} calls",
+    "running": "Running...",
+    "empty": "No results.",
+    "missing": "This run is missing its request. Start over from Ask.",
+    "unsupported": "Streaming results are not available on this platform yet.",
+    "status": {
+      "queued": "Queued",
+      "planning": "Planning",
+      "calling": "Calling",
+      "extracting": "Extracting",
+      "done": "Done",
+      "failed": "Failed"
+    }
+  },
+  "resultDetail": {
+    "title": "Detail",
+    "ingredients": "Ingredients",
+    "steps": "Steps",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min",
+    "servings_one": "{{count}} serving",
+    "servings_other": "{{count}} servings",
+    "viewSource": "View source"
+  },
+  "history": {
+    "title": "History",
+    "runTitle": "Run",
+    "empty": "No runs yet. Your past requests will appear here.",
+    "error": "Could not load your runs.",
+    "counts": "{{sites}} sites · {{results}} results",
+    "status": {
+      "running": "Running",
+      "done": "Done",
+      "failed": "Failed"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": {
+      "label": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "selectTheme": "Select Theme",
+    "themeDescription": "App color scheme",
+    "language": "Language",
+    "languageDescription": "Select your preferred language",
+    "account": "Account",
+    "signInDescription": "Sync data across devices",
+    "about": "About",
+    "version": "Version 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "signOutConfirm": "Are you sure you want to sign out?",
+    "email": "Email",
+    "password": "Password",
+    "error": "An error occurred",
+    "guest": "Guest",
+    "signedIn": "Signed In",
+    "createAccount": "Create Account",
+    "createAccountDescription": "Save your data and sync across devices",
+    "missingFields": "Please fill in all fields",
+    "orContinueWith": "Or continue with",
+    "signInWithGoogle": "Sign in with Google",
+    "signInWithApple": "Sign in with Apple",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "forgotPassword": "Forgot password?",
+    "resetPasswordHint": "Enter your email address and we'll send you a link to reset your password.",
+    "sendResetLink": "Send reset link",
+    "resetEmailSent": "If an account uses that address, a link to reset its password is on its way. Check your email.",
+    "backToSignIn": "Back to sign in",
+    "missingEmail": "Enter your email address.",
+    "signInToAccount": "Sign in to your account",
+    "resetPassword": "Reset your password",
+    "close": "Close"
+  },
+  "tabs": {
+    "histories": "Histories",
+    "settings": "Settings"
+  }
+}

@@ -1,0 +1,417 @@
+{
+  "metadata": {
+    "version": "0.0.1",
+    "lastUpdated": "2026-10-02",
+    "whatsNew": "First release."
+  },
+  "capture": {
+    "loopOrder": "languages_first"
+  },
+  "build": {
+    "metroPort": 8090,
+    "ios": {
+      "appName": "RaidrAgent",
+      "workspace": "RaidrAgent.xcworkspace",
+      "scheme": "RaidrAgent"
+    },
+    "macos": {
+      "workspace": "RaidrAgent.xcworkspace",
+      "scheme": "RaidrAgent-macOS"
+    }
+  },
+  "app": {
+    "name": "raidr agent",
+    "bundleId": "com.sudobility.raidragent",
+    "packageName": "com.sudobility.raidragent",
+    "developer": "Sudobility",
+    "website": "https://raidr.dev",
+    "supportUrl": "https://raidr.dev/support",
+    "marketingUrl": "https://raidr.dev",
+    "privacyPolicyUrl": "https://raidr.dev/privacy",
+    "termsOfServiceUrl": "https://raidr.dev/terms",
+    "contactEmail": "support@raidr.dev",
+    "privacyEmail": "privacy@raidr.dev",
+    "copyright": "© 2026 Sudobility",
+    "scheme": "raidragent"
+  },
+  "subscriptions": {
+    "products": []
+  },
+  "supportedLanguages": [
+    {
+      "code": "en",
+      "name": "English",
+      "primary": true
+    },
+    {
+      "code": "zh",
+      "name": "Chinese (Simplified)",
+      "primary": false
+    },
+    {
+      "code": "zh-Hant",
+      "name": "Chinese (Traditional)",
+      "primary": false
+    },
+    {
+      "code": "ja",
+      "name": "Japanese",
+      "primary": false
+    },
+    {
+      "code": "ko",
+      "name": "Korean",
+      "primary": false
+    },
+    {
+      "code": "es",
+      "name": "Spanish",
+      "primary": false
+    },
+    {
+      "code": "fr",
+      "name": "French",
+      "primary": false
+    },
+    {
+      "code": "de",
+      "name": "German",
+      "primary": false
+    },
+    {
+      "code": "pt",
+      "name": "Portuguese",
+      "primary": false
+    },
+    {
+      "code": "it",
+      "name": "Italian",
+      "primary": false
+    },
+    {
+      "code": "ru",
+      "name": "Russian",
+      "primary": false
+    },
+    {
+      "code": "sv",
+      "name": "Swedish",
+      "primary": false
+    },
+    {
+      "code": "th",
+      "name": "Thai",
+      "primary": false
+    },
+    {
+      "code": "uk",
+      "name": "Ukrainian",
+      "primary": false
+    },
+    {
+      "code": "vi",
+      "name": "Vietnamese",
+      "primary": false
+    }
+  ],
+  "appleAppStore": {
+    "primaryCategory": "Productivity",
+    "secondaryCategory": "Utilities",
+    "contentRights": {
+      "doesNotContainThirdPartyContent": true,
+      "hasRightsToAllContent": true
+    },
+    "ageRating": {
+      "ageRatingDeclaration": {
+        "kidsAgeBand": null,
+        "gamblingAndContests": "NONE",
+        "gambling": false,
+        "frequentOrIntenseCartoonOrFantasyViolence": false,
+        "frequentOrIntenseRealisticViolence": false,
+        "frequentOrIntenseSexualContentOrNudity": false,
+        "infrequentOrMildSexualContentOrNudity": false,
+        "frequentOrIntenseMatureOrSuggestiveThemes": false,
+        "infrequentOrMildMatureOrSuggestiveThemes": false,
+        "frequentOrIntenseHorrorOrFearThemes": false,
+        "infrequentOrMildHorrorOrFearThemes": false,
+        "frequentOrIntenseMedicalOrTreatmentInformation": false,
+        "infrequentOrMildMedicalOrTreatmentInformation": false,
+        "frequentOrIntenseProfanityOrCrudeHumor": false,
+        "infrequentOrMildProfanityOrCrudeHumor": false,
+        "frequentOrIntenseAlcoholTobaccoOrDrugUseOrReferences": false,
+        "infrequentOrMildAlcoholTobaccoOrDrugUseOrReferences": false,
+        "frequentOrIntenseSimulatedGambling": false,
+        "infrequentOrMildSimulatedGambling": false,
+        "unrestrictedWebAccess": true,
+        "gamblingSimulated": false
+      },
+      "expectedRating": "17+"
+    },
+    "appReview": {
+      "contactFirstName": "",
+      "contactLastName": "",
+      "contactPhone": "",
+      "contactEmail": "support@raidr.dev",
+      "demoAccountName": "",
+      "demoAccountPassword": "",
+      "notes": "TODO: describe the sign-in flow and provide a demo account before submitting."
+    },
+    "pricing": {
+      "priceTier": 0,
+      "availableInAllTerritories": true
+    },
+    "appPrivacy": {
+      "privacyPolicyUrl": "https://raidr.dev/privacy",
+      "dataCollection": {
+        "collectsData": true,
+        "dataTypes": [
+          {
+            "type": "Contact Info",
+            "subtype": "Email Address",
+            "purposes": [
+              "App Functionality"
+            ],
+            "linked": true,
+            "tracking": false
+          },
+          {
+            "type": "Contact Info",
+            "subtype": "Name",
+            "purposes": [
+              "App Functionality"
+            ],
+            "linked": true,
+            "tracking": false
+          },
+          {
+            "type": "Identifiers",
+            "subtype": "User ID",
+            "purposes": [
+              "App Functionality"
+            ],
+            "linked": true,
+            "tracking": false
+          },
+          {
+            "type": "Usage Data",
+            "subtype": "Product Interaction",
+            "purposes": [
+              "Analytics",
+              "App Functionality"
+            ],
+            "linked": true,
+            "tracking": false
+          },
+          {
+            "type": "Diagnostics",
+            "subtype": "Crash Data",
+            "purposes": [
+              "Analytics"
+            ],
+            "linked": false,
+            "tracking": false
+          },
+          {
+            "type": "Diagnostics",
+            "subtype": "Performance Data",
+            "purposes": [
+              "Analytics"
+            ],
+            "linked": false,
+            "tracking": false
+          },
+          {
+            "type": "Purchases",
+            "subtype": "Purchase History",
+            "purposes": [
+              "App Functionality"
+            ],
+            "linked": true,
+            "tracking": false
+          }
+        ]
+      }
+    },
+    "platforms": {
+      "ios": {
+        "minimumOsVersion": "15.1",
+        "devices": [
+          "iPhone",
+          "iPod touch"
+        ],
+        "supportsAppleWatch": false,
+        "supportsGameCenter": false,
+        "supportsUniversalPurchase": true
+      },
+      "ipados": {
+        "minimumOsVersion": "15.1",
+        "devices": [
+          "iPad"
+        ],
+        "supportsMultitasking": true,
+        "supportsSplitView": true,
+        "supportsUniversalPurchase": true
+      },
+      "macos": {
+        "minimumOsVersion": "13.0",
+        "architectures": [
+          "arm64",
+          "x86_64"
+        ],
+        "category": "Productivity",
+        "supportsUniversalPurchase": true
+      }
+    }
+  },
+  "googlePlay": {
+    "defaultLanguage": "en-US",
+    "applicationCategory": "PRODUCTIVITY",
+    "contentRating": {
+      "targetAgeGroup": "all",
+      "contentDescriptors": {
+        "violence": "none",
+        "sexualContent": "none",
+        "language": "none",
+        "controlledSubstance": "none",
+        "digitalPurchases": "no",
+        "sharesInfo": "no",
+        "sharesLocation": "no",
+        "gambling": "none"
+      },
+      "expectedRating": "Everyone",
+      "interactiveElements": [
+        "Unrestricted Internet"
+      ]
+    },
+    "dataSafety": {
+      "overview": {
+        "dataSharedWithThirdParties": false,
+        "dataCollected": true,
+        "securityPractices": {
+          "dataEncryptedInTransit": true,
+          "requestDataDeletion": true
+        }
+      },
+      "dataTypesCollected": [
+        {
+          "category": "Personal info",
+          "type": "Email address",
+          "collected": true,
+          "shared": false,
+          "required": false,
+          "purpose": [
+            "App functionality",
+            "Account management"
+          ],
+          "ephemeral": false
+        },
+        {
+          "category": "Personal info",
+          "type": "Name",
+          "collected": true,
+          "shared": false,
+          "required": false,
+          "purpose": [
+            "App functionality",
+            "Account management"
+          ],
+          "ephemeral": false
+        },
+        {
+          "category": "App activity",
+          "type": "App interactions",
+          "collected": true,
+          "shared": false,
+          "required": false,
+          "purpose": [
+            "Analytics"
+          ],
+          "ephemeral": false
+        },
+        {
+          "category": "App info and performance",
+          "type": "Crash logs",
+          "collected": true,
+          "shared": false,
+          "required": false,
+          "purpose": [
+            "Analytics"
+          ],
+          "ephemeral": false
+        },
+        {
+          "category": "App info and performance",
+          "type": "Diagnostics",
+          "collected": true,
+          "shared": false,
+          "required": false,
+          "purpose": [
+            "Analytics"
+          ],
+          "ephemeral": false
+        },
+        {
+          "category": "Device or other IDs",
+          "type": "Device or other IDs",
+          "collected": true,
+          "shared": false,
+          "required": false,
+          "purpose": [
+            "Analytics",
+            "App functionality"
+          ],
+          "ephemeral": false
+        }
+      ]
+    },
+    "pricing": {
+      "free": true,
+      "containsAds": false,
+      "inAppPurchases": false
+    },
+    "targetAudience": {
+      "targetAge": "all",
+      "appealsToChildren": false,
+      "familyProgram": false
+    },
+    "contactDetails": {
+      "email": "support@raidr.dev",
+      "website": "https://raidr.dev",
+      "privacyPolicy": "https://raidr.dev/privacy"
+    }
+  },
+  "microsoftStore": {
+    "category": "Productivity",
+    "properties": {
+      "category": "Productivity",
+      "privacyPolicyUrl": "https://raidr.dev/privacy",
+      "supportContactUrl": "https://raidr.dev/support",
+      "websiteUrl": "https://raidr.dev"
+    },
+    "ageRating": {
+      "iarc": "3+",
+      "contentDescriptors": {
+        "violence": "none",
+        "fear": "none",
+        "sexuality": "none",
+        "drugs": "none",
+        "language": "none",
+        "discrimination": "none",
+        "gambling": "none",
+        "onlineInteractivity": "none",
+        "inAppPurchases": false
+      }
+    },
+    "pricing": {
+      "free": true,
+      "inAppPurchases": false
+    },
+    "systemRequirements": {
+      "minimumOs": "Windows 10 version 17763.0",
+      "architecture": [
+        "x64",
+        "ARM64"
+      ]
+    }
+  }
+}

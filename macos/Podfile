@@ -1,0 +1,128 @@
+require 'pathname'
+
+ws_dir = Pathname.new(__dir__)
+ws_dir = ws_dir.parent until
+  File.exist?("#{ws_dir}/node_modules/react-native-macos/scripts/react_native_pods.rb") ||
+  ws_dir.expand_path.to_s == '/'
+require "#{ws_dir}/node_modules/react-native-macos/scripts/react_native_pods.rb"
+
+prepare_react_native_project!
+
+# react-native-firebase is not linked on macOS (its analytics, crashlytics,
+# messaging, perf and remote config are mobile only; auth is the Firebase JS
+# SDK on every platform), but its podspecs are still evaluated during codegen
+# discovery. Since version 26 that switches them to Swift Package Manager
+# mode, which then rejects this target's static linkage and fails
+# `pod install`. Keep them in CocoaPods mode so the check does not apply.
+$RNFirebaseDisableSPM = true
+
+# Packages to exclude from macOS autolinking (not needed on desktop)
+EXCLUDED_PACKAGES = %w[
+  @react-native-firebase/app
+  @react-native-firebase/analytics
+  @react-native-firebase/crashlytics
+  @react-native-firebase/messaging
+  @react-native-firebase/perf
+  @react-native-firebase/remote-config
+  @react-native-google-signin/google-signin
+  expo
+].freeze
+
+target 'RaidrAgent-macOS' do
+  platform :macos, '14.0'
+
+  # Split use_native_modules! into list + filter + link to exclude Firebase
+  pods = list_native_modules!($default_command)
+  pods[:ios_packages].reject! { |p| EXCLUDED_PACKAGES.include?(p[:name]) }
+  link_native_modules!(pods)
+
+  # Flags change depending on the env values.
+  flags = get_default_flags()
+
+  use_react_native!(
+    :path => '../node_modules/react-native-macos',
+    :fabric_enabled => ENV['RCT_NEW_ARCH_ENABLED'] == '1',
+    # An absolute path to your application root.
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  # Nil-safe patch script — runs as an Xcode build phase AFTER codegen,
+  # BEFORE compilation, to guard against NSClassFromString returning nil.
+  NIL_SAFE_PATCH_SCRIPT = <<~'SH'
+    PROVIDER="$PODS_ROOT/../build/generated/ios/RCTThirdPartyComponentsProvider.mm"
+    if [ -f "$PROVIDER" ] && grep -q 'NSClassFromString' "$PROVIDER" && ! grep -q 'NSMutableDictionary' "$PROVIDER"; then
+      ruby -e '
+        f = ARGV[0]
+        src = File.read(f)
+        patched = src.gsub(/thirdPartyComponents = @\{([^}]+)\};/m) do
+          entries = $1
+          pairs = entries.scan(/@"([^"]+)":\s*NSClassFromString\(@"([^"]+)"\)/)
+          map_lines = pairs.map { |k,v| "\t\t@\"#{k}\": @\"#{v}\"," }.join("\n")
+          <<~OBJC.chomp
+  NSMutableDictionary<NSString *, Class<RCTComponentViewProtocol>> *components = [NSMutableDictionary new];
+              NSDictionary<NSString *, NSString *> *mapping = @{
+  #{map_lines}
+              };
+              for (NSString *key in mapping) {
+                Class cls = NSClassFromString(mapping[key]);
+                if (cls != nil) { components[key] = cls; }
+              }
+              thirdPartyComponents = [components copy];
+          OBJC
+        end
+        File.write(f, patched)
+      ' "$PROVIDER"
+      echo "[macOS] Patched RCTThirdPartyComponentsProvider.mm to be nil-safe"
+    fi
+  SH
+
+  post_install do |installer|
+    react_native_post_install(installer)
+
+    # Add a "Patch Nil-Safe Components" script phase to the main app target
+    # so it runs every build AFTER codegen but BEFORE compile sources.
+    project_path = File.join(__dir__, 'RaidrAgent.xcodeproj')
+
+    # ---- Build-speed settings -------------------------------------------
+    #
+    # Xcode's DerivedData is the real cache and needs no configuration — it only
+    # needs to be *used*, which means never passing `-derivedDataPath`.
+    # These cut what a build has to do; none changes the produced binary.
+    #
+    # No prebuilt-artifact flags here: react-native-macos publishes none.
+    # No ccache, deliberately. Measured on a 1,192-file macOS build with the
+    # launcher wired in: ccache saw 1,421 invocations and cached none of them.
+    # 81.67% of uncacheable calls were "Could not use modules" — React Native
+    # compiles with clang modules throughout, and only `sloppiness=modules`
+    # makes those cacheable, which ccache disables by default because it can
+    # serve an incorrect object file. Warm DerivedData and the prebuilt
+    # artifacts do this job; a compiler wrapper on every invocation does not.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |bc|
+        # The index store feeds Xcode's editor; a CLI build discards it.
+        bc.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
+        next unless bc.name == 'Debug'
+        bc.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
+        bc.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf'
+      end
+    end
+    project = Xcodeproj::Project.open(project_path)
+    target = project.targets.find { |t| t.name == 'RaidrAgent-macOS' }
+    if target
+      phase_name = '[macOS] Patch Nil-Safe Components'
+      existing = target.shell_script_build_phases.find { |p| p.name == phase_name }
+      unless existing
+        phase = target.new_shell_script_build_phase(phase_name)
+        phase.shell_script = NIL_SAFE_PATCH_SCRIPT
+        phase.shell_path = '/bin/sh'
+        # Move before Compile Sources
+        compile = target.build_phases.find { |p| p.is_a?(Xcodeproj::Project::Object::PBXSourcesBuildPhase) }
+        if compile
+          target.build_phases.move(phase, target.build_phases.index(compile))
+        end
+        project.save
+        Pod::UI.puts "[macOS] Added nil-safe patch build phase to RaidrAgent-macOS target"
+      end
+    end
+  end
+end

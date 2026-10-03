@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "back": "Atrás"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "appearance": "Apariencia",
+    "theme": {
+      "label": "Tema",
+      "system": "Sistema",
+      "light": "Luz",
+      "dark": "Oscuro"
+    },
+    "selectTheme": "Seleccionar tema",
+    "themeDescription": "Esquema de colores de la aplicación",
+    "language": "Idioma",
+    "languageDescription": "Seleccione su idioma preferido",
+    "account": "Cuenta",
+    "signInDescription": "Sincronizar datos entre dispositivos",
+    "about": "Acerca de",
+    "version": "Versión 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesión",
+    "signOutConfirm": "¿Estás seguro de que deseas cerrar sesión?",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "error": "Se ha producido un error",
+    "guest": "Invitado",
+    "signedIn": "Iniciado sesión",
+    "createAccount": "Crear cuenta",
+    "createAccountDescription": "Guarde sus datos y sincronícelos entre dispositivos",
+    "missingFields": "Por favor, complete todos los campos",
+    "orContinueWith": "O continúa con",
+    "signInWithGoogle": "Iniciar sesión con Google",
+    "signInWithApple": "Iniciar sesión con Apple",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "dontHaveAccount": "¿No tienes una cuenta?",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetPasswordHint": "Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+    "sendResetLink": "Enviar enlace",
+    "resetEmailSent": "Si alguna cuenta usa esa dirección, le hemos enviado un enlace para restablecer la contraseña. Revisa tu correo.",
+    "backToSignIn": "Volver a iniciar sesión",
+    "missingEmail": "Introduce tu correo electrónico.",
+    "signInToAccount": "Inicia sesión en tu cuenta",
+    "resetPassword": "Restablece tu contraseña",
+    "close": "Cerrar"
+  },
+  "tabs": {
+    "histories": "Historias",
+    "settings": "Ajustes"
+  }
+}

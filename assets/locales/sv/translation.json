@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Läser in...",
+    "error": "Fel",
+    "cancel": "Avbryta",
+    "delete": "Ta bort",
+    "back": "Tillbaka"
+  },
+  "settings": {
+    "title": "Inställningar",
+    "appearance": "Utseende",
+    "theme": {
+      "label": "Ämne",
+      "system": "System",
+      "light": "Ljus",
+      "dark": "Mörk"
+    },
+    "selectTheme": "Välj tema",
+    "themeDescription": "Appens färgschema",
+    "language": "Språk",
+    "languageDescription": "Välj ditt föredragna språk",
+    "account": "Konto",
+    "signInDescription": "Synkronisera data mellan enheter",
+    "about": "Om",
+    "version": "Version 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Logga in",
+    "signUp": "Registrera dig",
+    "signOut": "Logga ut",
+    "signOutConfirm": "Är du säker på att du vill logga ut?",
+    "email": "E-post",
+    "password": "Lösenord",
+    "error": "Ett fel uppstod",
+    "guest": "Gäst",
+    "signedIn": "Inloggad",
+    "createAccount": "Skapa konto",
+    "createAccountDescription": "Spara dina data och synkronisera över enheter",
+    "missingFields": "Fyll i alla fält",
+    "orContinueWith": "Eller fortsätt med",
+    "signInWithGoogle": "Logga in med Google",
+    "signInWithApple": "Logga in med Apple",
+    "alreadyHaveAccount": "Har du redan ett konto?",
+    "dontHaveAccount": "Har du inget konto?",
+    "forgotPassword": "Glömt lösenordet?",
+    "resetPasswordHint": "Ange din e-postadress så skickar vi en länk för att återställa ditt lösenord.",
+    "sendResetLink": "Skicka återställningslänk",
+    "resetEmailSent": "Om ett konto använder den adressen är en länk för att återställa lösenordet på väg. Kolla din e-post.",
+    "backToSignIn": "Tillbaka till inloggning",
+    "missingEmail": "Ange din e-postadress.",
+    "signInToAccount": "Logga in på ditt konto",
+    "resetPassword": "Återställ ditt lösenord",
+    "close": "Stäng"
+  },
+  "tabs": {
+    "histories": "Historier",
+    "settings": "Inställningar"
+  }
+}

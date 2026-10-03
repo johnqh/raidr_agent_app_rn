@@ -1,0 +1,60 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "back": "Voltar"
+  },
+  "settings": {
+    "title": "Configurações",
+    "appearance": "Aparência",
+    "theme": {
+      "label": "Tema",
+      "system": "Sistema",
+      "light": "Luz",
+      "dark": "Escuro"
+    },
+    "selectTheme": "Selecionar Tema",
+    "themeDescription": "Esquema de cores do aplicativo",
+    "language": "Idioma",
+    "languageDescription": "Selecione seu idioma preferido",
+    "account": "Conta",
+    "signInDescription": "Sincronizar dados entre dispositivos",
+    "about": "Sobre",
+    "version": "Versão 1.0.0",
+    "copyright": "2024 {{companyName}}"
+  },
+  "auth": {
+    "signIn": "Entrar",
+    "signUp": "Inscrever-se",
+    "signOut": "Sair",
+    "signOutConfirm": "Tem certeza de que deseja sair?",
+    "email": "E-mail",
+    "password": "Senha",
+    "error": "Ocorreu um erro",
+    "guest": "Convidado",
+    "signedIn": "Conectado",
+    "createAccount": "Criar conta",
+    "createAccountDescription": "Guarde os seus dados e sincronize entre dispositivos",
+    "missingFields": "Por favor, preencha todos os campos",
+    "orContinueWith": "Ou continue com",
+    "signInWithGoogle": "Entrar com o Google",
+    "signInWithApple": "Entrar com a Apple",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "dontHaveAccount": "Não tem uma conta?",
+    "forgotPassword": "Esqueceu a senha?",
+    "resetPasswordHint": "Digite seu endereço de e-mail e enviaremos um link para redefinir sua senha.",
+    "sendResetLink": "Enviar link de redefinição",
+    "resetEmailSent": "Se alguma conta usar esse endereço, um link para redefinir a senha está a caminho. Verifique seu e-mail.",
+    "backToSignIn": "Voltar para entrar",
+    "missingEmail": "Digite seu endereço de e-mail.",
+    "signInToAccount": "Entre na sua conta",
+    "resetPassword": "Redefinir sua senha",
+    "close": "Fechar"
+  },
+  "tabs": {
+    "histories": "Histórias",
+    "settings": "Configurações"
+  }
+}
