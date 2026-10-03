@@ -7,6 +7,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { LoginModal } from '@sudobility/components-rn';
 import SettingsScreen from '../SettingsScreen';
 import type { SettingsScreenProps } from '@/navigation/types';
+import { trackError, trackEvent } from '@/analytics';
 
 const mockAuth = {
   user: null as null | { uid: string; email: string; displayName: string },
@@ -97,6 +98,51 @@ describe('SettingsScreen sign-in', () => {
     });
     expect(mockAuth.signInWithEmail).toHaveBeenCalledWith('a@b.c', 'pw');
     expect(mockAuth.sendPasswordResetEmail).toHaveBeenCalledWith('a@b.c');
+  });
+
+  it('treats a cancelled Google sign-in as backing out, not a failure', async () => {
+    const cancelled = Object.assign(new Error('Sign in cancelled'), {
+      code: 'auth/user-cancelled',
+    });
+    mockAuth.signInWithGoogle.mockImplementationOnce(() =>
+      Promise.reject(cancelled)
+    );
+    (trackError as jest.Mock).mockClear();
+    (trackEvent as jest.Mock).mockClear();
+
+    const tree = render();
+    const row = tree.root.find(
+      node =>
+        node.props.accessibilityLabel === 'auth.signIn' &&
+        typeof node.props.onPress === 'function'
+    );
+    act(() => {
+      row.props.onPress();
+    });
+    const modal = tree.root.findByType(LoginModal);
+
+    // Rethrown untouched, so LoginView sees the cancel and keeps the modal up.
+    await act(async () => {
+      await expect(modal.props.onGoogleSignIn()).rejects.toBe(cancelled);
+    });
+    expect(trackError).not.toHaveBeenCalled();
+    expect(trackEvent).not.toHaveBeenCalledWith('signed_in_google');
+    expect(tree.root.findByType(LoginModal).props.visible).toBe(true);
+  });
+
+  it('records a Google sign-in that really failed', async () => {
+    mockAuth.signInWithGoogle.mockImplementationOnce(() =>
+      Promise.reject(
+        Object.assign(new Error('boom'), { code: 'auth/internal-error' })
+      )
+    );
+    (trackError as jest.Mock).mockClear();
+
+    const modal = render().root.findByType(LoginModal);
+    await act(async () => {
+      await expect(modal.props.onGoogleSignIn()).rejects.toThrow('boom');
+    });
+    expect(trackError).toHaveBeenCalledWith('boom', 'google_sign_in_error');
   });
 
   it('shows the account, not the modal trigger, when signed in', () => {

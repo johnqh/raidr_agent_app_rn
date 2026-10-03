@@ -22,12 +22,26 @@ import {
 } from '@/context/AuthContext';
 import { trackButtonClick, trackError, trackEvent } from '@/analytics';
 
-/** Google's own "cancelled" codes, which the form should treat as backing out. */
-const GOOGLE_CANCELLED_CODES = [
-  'SIGN_IN_CANCELLED',
-  'sign_in_cancelled',
-  '12501',
+/**
+ * Whether a sign-in rejected because the person closed the provider's sheet.
+ * auth_lib (0.0.105+) rejects a cancelled Google or Apple sign-in with
+ * `auth/user-cancelled`, which `LoginView` already reads as backing out; the
+ * popup codes are Firebase's own word for the same thing. This is auth_lib's
+ * `isSignInCancelled`, restated: 0.0.105 defines it but does not export it
+ * from any entry point its `exports` map opens (`.` or `./auth-js`). Import it
+ * from there once a release does.
+ */
+const SIGN_IN_CANCELLED_CODES = [
+  'auth/user-cancelled',
+  'auth/popup-closed-by-user',
+  'auth/cancelled-popup-request',
 ];
+
+// TODO: import from @sudobility/auth_lib once its entry re-exports it
+export function isSignInCancelled(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code === 'string' && SIGN_IN_CANCELLED_CODES.includes(code);
+}
 
 function failureMessage(error: unknown): string {
   const failure = error as { message?: string } | null;
@@ -83,15 +97,11 @@ export function useSignInForm() {
           await signInWithGoogle();
           trackEvent('signed_in_google');
         } catch (error) {
-          const code = (error as { code?: string } | null)?.code;
-          if (code && GOOGLE_CANCELLED_CODES.includes(code)) {
-            // Backing out of Google's sheet is not a failure: the form keeps
-            // quiet about a code it knows to mean the user cancelled.
-            throw Object.assign(new Error(failureMessage(error)), {
-              code: 'auth/user-cancelled',
-            });
+          // Backing out of Google's sheet is not a failure: record nothing,
+          // and rethrow so the form stays open and says nothing either.
+          if (!isSignInCancelled(error)) {
+            trackError(failureMessage(error), 'google_sign_in_error');
           }
-          trackError(failureMessage(error), 'google_sign_in_error');
           throw error;
         }
       },
@@ -101,7 +111,9 @@ export function useSignInForm() {
           await signInWithApple();
           trackEvent('signed_in_apple');
         } catch (error) {
-          trackError(failureMessage(error), 'apple_sign_in_error');
+          if (!isSignInCancelled(error)) {
+            trackError(failureMessage(error), 'apple_sign_in_error');
+          }
           throw error;
         }
       },
