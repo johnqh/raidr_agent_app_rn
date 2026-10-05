@@ -12,6 +12,7 @@
 
 import { useMemo } from 'react';
 import { useTheme } from '@react-navigation/native';
+import { isSignInCancelled } from '@sudobility/auth_lib/signin';
 import { useTranslation } from 'react-i18next';
 import type { LoginModalText } from '@sudobility/components-rn';
 import type { LoginPageText } from '@sudobility/building_blocks_rn';
@@ -21,27 +22,6 @@ import {
   useAuth,
 } from '@/context/AuthContext';
 import { trackButtonClick, trackError, trackEvent } from '@/analytics';
-
-/**
- * Whether a sign-in rejected because the person closed the provider's sheet.
- * auth_lib (0.0.105+) rejects a cancelled Google or Apple sign-in with
- * `auth/user-cancelled`, which `LoginView` already reads as backing out; the
- * popup codes are Firebase's own word for the same thing. This is auth_lib's
- * `isSignInCancelled`, restated: 0.0.105 defines it but does not export it
- * from any entry point its `exports` map opens (`.` or `./auth-js`). Import it
- * from there once a release does.
- */
-const SIGN_IN_CANCELLED_CODES = [
-  'auth/user-cancelled',
-  'auth/popup-closed-by-user',
-  'auth/cancelled-popup-request',
-];
-
-// TODO: import from @sudobility/auth_lib once its entry re-exports it
-export function isSignInCancelled(error: unknown): boolean {
-  const code = (error as { code?: unknown } | null)?.code;
-  return typeof code === 'string' && SIGN_IN_CANCELLED_CODES.includes(code);
-}
 
 function failureMessage(error: unknown): string {
   const failure = error as { message?: string } | null;

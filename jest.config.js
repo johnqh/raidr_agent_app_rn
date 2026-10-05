@@ -1,8 +1,13 @@
 module.exports = {
   preset: 'react-native',
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-navigation|react-native-svg|react-native-heroicons|react-native-safe-area-context|react-native-screens|react-native-gesture-handler|@react-native-async-storage|react-native-localize|expo|expo-status-bar|@sudobility)/)',
+    'node_modules/(?!(react-native|@react-native|@react-navigation|react-native-svg|react-native-heroicons|react-native-safe-area-context|react-native-screens|react-native-gesture-handler|react-native-css-interop|react-native-localize|nativewind|@react-native-async-storage|expo|expo-status-bar|@sudobility|firebase|@firebase)/)',
   ],
+  // `@sudobility/auth_lib/signin` imports Firebase's JS SDK, whose default
+  // (ESM) entries reach `.mjs` files the preset's transform does not cover.
+  transform: {
+    '^.+\\.mjs$': 'babel-jest',
+  },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },

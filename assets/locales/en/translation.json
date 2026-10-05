@@ -3,6 +3,7 @@
     "loading": "Loading...",
     "error": "Error",
     "cancel": "Cancel",
+    "continue": "Continue",
     "delete": "Delete",
     "back": "Back"
   },
@@ -12,6 +13,10 @@
     "placeholder": "Describe what you want done, e.g. \"find me a table for two on Friday\"",
     "go": "Go",
     "classifying": "Finding the right sites...",
+    "locating": "Getting your location...",
+    "locationRequired": "Location access is needed for this request. Enable location services and try again.",
+    "locationDisclosureTitle": "Use your location?",
+    "locationDisclosure": "Your device location will be sent to ShapeShyft to find nearby results.",
     "error": "Could not understand that request. Try rephrasing it.",
     "comingSoon": "Coming soon: raidr agent will pick the right sites, sign you in and stream the results here."
   },
@@ -39,6 +44,9 @@
     "title": "Results",
     "progress": "Progress",
     "answers": "Answers",
+    "list": "List",
+    "map": "Map",
+    "noMapResults": "No results include map coordinates.",
     "calls_one": "{{count}} call",
     "calls_other": "{{count}} calls",
     "running": "Running...",

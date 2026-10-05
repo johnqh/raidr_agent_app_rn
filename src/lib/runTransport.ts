@@ -19,10 +19,9 @@
  * message stream (`{ type: 'data-<key>', id?, data }`), so the server contract
  * is unchanged.
  *
- * Streaming needs `expo/fetch`, which backs iOS and Android only. On macOS and
- * Windows {@link isStreamingSupported} returns `false`; the screen then shows a
- * not-yet-available notice. TODO(desktop): add a streaming fetch for the
- * desktops, or poll `GET /runs/:id` via `useRun` once a run id is known.
+ * Desktop React Native fetch implementations buffer response bodies. On those
+ * hosts we parse the same UI-message stream after the run completes, while
+ * mobile continues to render each part as it arrives.
  */
 
 import { Platform } from 'react-native';
@@ -59,11 +58,6 @@ export interface RunCallbacks {
 /** A started run; `abort()` cancels the request and stops the reader. */
 export interface RunHandle {
   abort: () => void;
-}
-
-/** Whether this platform can stream a run (needs `expo/fetch`). */
-export function isStreamingSupported(): boolean {
-  return Platform.OS === 'ios' || Platform.OS === 'android';
 }
 
 /** The raw shape of a UI-message-stream chunk we care about. */
@@ -105,7 +99,11 @@ export function startRun(
   const run = async (): Promise<void> => {
     try {
       const token = await getToken();
-      const response = await expoFetch(client.runsUrl(), {
+      const fetchRun =
+        Platform.OS === 'ios' || Platform.OS === 'android'
+          ? expoFetch
+          : globalThis.fetch;
+      const response = await fetchRun(client.runsUrl(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,14 +120,6 @@ export function startRun(
           detail || `Run request failed (HTTP ${response.status})`
         );
       }
-      if (!response.body) {
-        throw new Error('Run response had no body to stream.');
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
       const handleLine = (line: string): void => {
         const trimmed = line.trim();
         if (
@@ -159,22 +149,28 @@ export function startRun(
         }
       };
 
-      // Read to completion, splitting the byte stream into SSE lines.
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
+      if (response.body?.getReader) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let newlineIndex = buffer.indexOf('\n');
+          while (newlineIndex !== -1) {
+            handleLine(buffer.slice(0, newlineIndex));
+            buffer = buffer.slice(newlineIndex + 1);
+            newlineIndex = buffer.indexOf('\n');
+          }
         }
-        buffer += decoder.decode(value, { stream: true });
-        let newlineIndex = buffer.indexOf('\n');
-        while (newlineIndex !== -1) {
-          handleLine(buffer.slice(0, newlineIndex));
-          buffer = buffer.slice(newlineIndex + 1);
-          newlineIndex = buffer.indexOf('\n');
+        buffer += decoder.decode();
+        if (buffer.length > 0) handleLine(buffer);
+      } else {
+        const body = await response.text();
+        for (const line of body.split(/\r?\n/)) {
+          handleLine(line);
         }
-      }
-      if (buffer.length > 0) {
-        handleLine(buffer);
       }
       callbacks.onFinish?.();
     } catch (error) {

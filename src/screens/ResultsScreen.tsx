@@ -12,7 +12,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Badge, Spinner } from '@sudobility/components-rn';
+import { Text, Badge, Button, Spinner } from '@sudobility/components-rn';
 import { useTranslation } from 'react-i18next';
 import { useSelectionStore } from '@sudobility/raidr_agent_lib';
 import type {
@@ -27,12 +27,9 @@ import { useAgentClient } from '@/hooks/useAgentClient';
 import { useAuth } from '@/context/AuthContext';
 import { useRunFlowStore } from '@/stores/runFlowStore';
 import { getSiteToken } from '@/lib/secureStorage';
-import {
-  startRun,
-  isStreamingSupported,
-  type RunHandle,
-} from '@/lib/runTransport';
+import { startRun, type RunHandle } from '@/lib/runTransport';
 import ResultCard from '@/components/ResultCard';
+import ResultsMap from '@/components/ResultsMap';
 import { trackScreenView } from '@/analytics';
 import type { ResultsScreenProps } from '@/navigation/types';
 
@@ -43,6 +40,7 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
   const request = useRunFlowStore(s => s.request);
   const intent = useRunFlowStore(s => s.intent);
   const candidates = useRunFlowStore(s => s.candidates);
+  const location = useRunFlowStore(s => s.location);
 
   const client = useAgentClient();
   const { getToken } = useAuth();
@@ -53,7 +51,7 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
   const [run, setRun] = useState<RunData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
-  const [unsupported, setUnsupported] = useState(false);
+  const [view, setView] = useState<'list' | 'map'>('list');
 
   useEffect(() => {
     trackScreenView('Results');
@@ -65,8 +63,8 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
       setFinished(true);
       return;
     }
-    if (!isStreamingSupported()) {
-      setUnsupported(true);
+    if (intent.location_needed && !location) {
+      setError(t('ask.locationRequired'));
       setFinished(true);
       return;
     }
@@ -88,7 +86,7 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
       handle = startRun(
         client,
         getToken,
-        { request, intent, sites },
+        { request, intent, sites, ...(location ? { location } : {}) },
         {
           onPart: part => {
             if (cancelled) {
@@ -149,6 +147,7 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
   );
 
   const running = !finished && (!run || run.status === 'running');
+  const locationNeeded = intent?.location_needed === true;
 
   return (
     <SafeAreaView className='flex-1 bg-background' edges={['left', 'right']}>
@@ -213,31 +212,63 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
         {/* Results */}
         {results.length > 0 ? (
           <>
-            <Text
-              size='sm'
-              weight='semibold'
-              color='muted'
-              transform='uppercase'
-              className='mb-2 px-1 tracking-wide'
-            >
-              {t('results.answers')}
-            </Text>
-            {results.map(item => (
-              <ResultCard
-                key={item.id}
-                item={item}
-                onPress={() => navigation.navigate('ResultDetail', { item })}
-              />
-            ))}
+            <View className='flex-row items-center justify-between mb-2 px-1'>
+              <Text
+                size='sm'
+                weight='semibold'
+                color='muted'
+                transform='uppercase'
+              >
+                {t('results.answers')}
+              </Text>
+              {locationNeeded ? (
+                <View className='flex-row'>
+                  <Button
+                    variant={view === 'list' ? 'primary' : 'outline'}
+                    size='sm'
+                    onPress={() => setView('list')}
+                  >
+                    {t('results.list')}
+                  </Button>
+                  <Button
+                    variant={view === 'map' ? 'primary' : 'outline'}
+                    size='sm'
+                    onPress={() => setView('map')}
+                  >
+                    {t('results.map')}
+                  </Button>
+                </View>
+              ) : null}
+            </View>
+            {view === 'map' ? (
+              <>
+                <ResultsMap
+                  items={results}
+                  userLocation={location}
+                  onSelect={item =>
+                    navigation.navigate('ResultDetail', { item })
+                  }
+                />
+                {!results.some(item => item.location != null) ? (
+                  <Text size='sm' color='muted' className='mt-2'>
+                    {t('results.noMapResults')}
+                  </Text>
+                ) : null}
+              </>
+            ) : (
+              results.map(item => (
+                <ResultCard
+                  key={item.id}
+                  item={item}
+                  onPress={() => navigation.navigate('ResultDetail', { item })}
+                />
+              ))
+            )}
           </>
         ) : null}
 
         {/* States */}
-        {unsupported ? (
-          <Text size='sm' color='muted' className='mt-2 px-1'>
-            {t('results.unsupported')}
-          </Text>
-        ) : error ? (
+        {error ? (
           <Text size='sm' color='danger' className='mt-2 px-1'>
             {error}
           </Text>

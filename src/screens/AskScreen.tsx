@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { Alert, View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Button, Input, Spinner } from '@sudobility/components-rn';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,7 @@ import { useTabBarHeight } from '@/hooks/useTabBarHeight';
 import { useApi } from '@/context/ApiContext';
 import { useAuth } from '@/context/AuthContext';
 import { useRunFlowStore } from '@/stores/runFlowStore';
+import { getDeviceLocation } from '@/lib/deviceLocation';
 import { trackScreenView, trackButtonClick, trackError } from '@/analytics';
 import type { AskScreenProps } from '@/navigation/types';
 
@@ -24,6 +25,8 @@ export default function AskScreen({ navigation }: AskScreenProps) {
   const { t } = useTranslation();
   const tabBarHeight = useTabBarHeight();
   const [request, setRequest] = useState('');
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState(false);
 
   const { networkClient, baseUrl } = useApi();
   const { getToken } = useAuth();
@@ -41,17 +44,53 @@ export default function AskScreen({ navigation }: AskScreenProps) {
       return;
     }
     trackButtonClick('ask_go');
+    setLocationError(false);
     try {
       const { intent, candidates } = await classifyIntent.mutateAsync(trimmed);
+      let location = null;
+      if (intent.location_needed) {
+        const shareLocation = await new Promise<boolean>(resolve => {
+          Alert.alert(
+            t('ask.locationDisclosureTitle'),
+            t('ask.locationDisclosure'),
+            [
+              {
+                text: t('common.cancel'),
+                style: 'cancel',
+                onPress: () => resolve(false),
+              },
+              { text: t('common.continue'), onPress: () => resolve(true) },
+            ],
+            { cancelable: false }
+          );
+        });
+        if (!shareLocation) {
+          setLocationError(true);
+          return;
+        }
+        setLocating(true);
+        try {
+          location = await getDeviceLocation();
+        } catch {
+          // A disabled location service or a failed position fix also blocks the run.
+        } finally {
+          setLocating(false);
+        }
+        if (!location) {
+          setLocationError(true);
+          return;
+        }
+      }
       resetSelection();
-      setFlow(trimmed, intent, candidates);
+      setFlow(trimmed, intent, candidates, location);
       navigation.navigate('Sites');
     } catch (error) {
       trackError(error instanceof Error ? error.message : 'intent_failed');
     }
-  }, [request, classifyIntent, resetSelection, setFlow, navigation]);
+  }, [request, classifyIntent, resetSelection, setFlow, navigation, t]);
 
-  const canSubmit = request.trim().length > 0 && !classifyIntent.isPending;
+  const busy = classifyIntent.isPending || locating;
+  const canSubmit = request.trim().length > 0 && !busy;
 
   return (
     <SafeAreaView className='flex-1 bg-background' edges={['left', 'right']}>
@@ -71,7 +110,7 @@ export default function AskScreen({ navigation }: AskScreenProps) {
           value={request}
           onChangeText={setRequest}
           multiline
-          editable={!classifyIntent.isPending}
+          editable={!busy}
           accessibilityLabel={t('ask.heading')}
           testID='ask-input'
         />
@@ -86,17 +125,22 @@ export default function AskScreen({ navigation }: AskScreenProps) {
             {t('ask.go')}
           </Button>
         </View>
-        {classifyIntent.isPending ? (
+        {busy ? (
           <View className='flex-row items-center mt-4'>
             <Spinner size='small' />
             <Text size='sm' color='muted' className='ml-2'>
-              {t('ask.classifying')}
+              {t(locating ? 'ask.locating' : 'ask.classifying')}
             </Text>
           </View>
         ) : null}
         {classifyIntent.isError ? (
           <Text size='sm' color='danger' className='mt-4'>
             {t('ask.error')}
+          </Text>
+        ) : null}
+        {locationError ? (
+          <Text size='sm' color='danger' className='mt-4'>
+            {t('ask.locationRequired')}
           </Text>
         ) : null}
       </ScrollView>
