@@ -43,7 +43,7 @@
     "@sudobility/di": "^1.5.68",
     "@sudobility/di_rn": "^0.1.151",
     "@sudobility/raidr_agent_client": "^0.0.3",
-    "@sudobility/raidr_agent_lib": "^0.0.3",
+    "@sudobility/raidr_agent_lib": "^0.0.4",
     "@sudobility/raidr_agent_types": "^0.0.3",
     "@sudobility/raidr_types": "^0.1.10",
     "@sudobility/types": "^1.9.68",
