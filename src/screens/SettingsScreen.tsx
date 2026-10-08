@@ -26,6 +26,8 @@ import { SUPPORTED_LANGUAGES, COMPANY_NAME } from '@/config/constants';
 import SignInModal from '@/components/SignInModal';
 import type { SettingsScreenProps } from '@/navigation/types';
 import { trackScreenView, trackButtonClick, trackEvent } from '@/analytics';
+import { useLlmKeys } from '@/hooks/useLlmKeys';
+import { LLM_PROVIDER_INFO } from '@/config/llmProviders';
 
 /** Display names for supported languages (in their native script). */
 const LANGUAGE_LABELS: Record<string, string> = {
@@ -58,10 +60,11 @@ function RowSeparator() {
   return <View className='h-px ml-4 bg-border' />;
 }
 
-export default function SettingsScreen(_props: SettingsScreenProps) {
+export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { t } = useTranslation();
   const { user, isLoading: authLoading, signOut } = useAuth();
-  const { theme, setTheme } = useSettingsStore();
+  const { theme, setTheme, agentMode } = useSettingsStore();
+  const { effective } = useLlmKeys();
 
   const tabBarHeight = useTabBarHeight();
 
@@ -123,6 +126,16 @@ export default function SettingsScreen(_props: SettingsScreenProps) {
     ]);
   }, [signOut, t]);
 
+  /** "Cloud", or "Local · <provider in use>". */
+  const agentModeLabel =
+    agentMode === 'local'
+      ? effective[0]
+        ? t('settings.agentMode.localWith', {
+            provider: LLM_PROVIDER_INFO[effective[0]].name,
+          })
+        : t('settings.agentMode.local')
+      : t('settings.agentMode.cloud');
+
   const currentTheme = themes.find(th => th.value === theme)?.label ?? 'System';
 
   return (
@@ -133,6 +146,44 @@ export default function SettingsScreen(_props: SettingsScreenProps) {
           { paddingBottom: tabBarHeight + 16 },
         ]}
       >
+        {/* Agent Section */}
+        <View className='mb-7'>
+          <Text
+            size='sm'
+            weight='semibold'
+            color='muted'
+            transform='uppercase'
+            className='mb-2 px-1 tracking-wide'
+          >
+            {t('settings.agent')}
+          </Text>
+          <View className='rounded-lg overflow-hidden bg-card'>
+            <Pressable
+              className='flex-row justify-between items-center py-3 px-4'
+              onPress={() => {
+                trackButtonClick('api_keys');
+                navigation.navigate('ApiKeys');
+              }}
+              accessibilityRole='button'
+              accessibilityLabel={`${t('settings.apiKeys')}: ${agentModeLabel}`}
+              testID='settings-api-keys'
+            >
+              <View className='flex-1 mr-3'>
+                <Text size='base'>{t('settings.apiKeys')}</Text>
+                <Text size='sm' color='muted' className='mt-0.5'>
+                  {t('settings.apiKeysDescription')}
+                </Text>
+              </View>
+              <Text size='base' color='muted'>
+                {agentModeLabel}
+              </Text>
+              <Text size='xl' color='muted' className='ml-2'>
+                {'›'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
         {/* Appearance Section */}
         <View className='mb-7'>
           <Text

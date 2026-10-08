@@ -2,10 +2,12 @@
  * History run detail — the saved results of one past run.
  *
  * Loads the run (`GET /runs/:id`) and shows its per-site outcome and the saved
- * answer cards. Tapping a card opens the same Result detail used by a live run.
+ * answers the way a live run shows them: for a `single` / `best` request the
+ * stored best result in full (with why) and "See all N results"; otherwise
+ * the cards. Tapping a card opens the same Result detail used by a live run.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Badge, Spinner } from '@sudobility/components-rn';
@@ -15,7 +17,9 @@ import { useTabBarHeight } from '@/hooks/useTabBarHeight';
 import { useApi } from '@/context/ApiContext';
 import { useAuth } from '@/context/AuthContext';
 import ResultCard from '@/components/ResultCard';
-import { trackScreenView } from '@/analytics';
+import BestResult from '@/components/BestResult';
+import { bestResult, showsBest } from '@/lib/results';
+import { trackScreenView, trackButtonClick } from '@/analytics';
 import type { HistoryRunScreenProps } from '@/navigation/types';
 
 export default function HistoryRunScreen({
@@ -35,6 +39,11 @@ export default function HistoryRunScreen({
   }, []);
 
   const detail = runQuery.data;
+  const [showAll, setShowAll] = useState(false);
+  const top =
+    detail && showsBest(detail.intent?.selection) && !showAll
+      ? bestResult(detail.results, detail.best)
+      : null;
 
   return (
     <SafeAreaView className='flex-1 bg-background' edges={['left', 'right']}>
@@ -87,7 +96,19 @@ export default function HistoryRunScreen({
               </View>
             ) : null}
 
-            {detail.results.length > 0 ? (
+            {top ? (
+              <BestResult
+                item={top.item}
+                reason={top.reason}
+                total={detail.results.length}
+                onSeeAll={() => {
+                  trackButtonClick('history_see_all', {
+                    count: detail.results.length,
+                  });
+                  setShowAll(true);
+                }}
+              />
+            ) : detail.results.length > 0 ? (
               <>
                 <Text
                   size='sm'
@@ -103,7 +124,12 @@ export default function HistoryRunScreen({
                     key={item.id}
                     item={item}
                     onPress={() =>
-                      navigation.navigate('ResultDetail', { item })
+                      navigation.navigate('ResultDetail', {
+                        item,
+                        ...(detail.best?.resultId === item.id
+                          ? { reason: detail.best.reason }
+                          : {}),
+                      })
                     }
                   />
                 ))}

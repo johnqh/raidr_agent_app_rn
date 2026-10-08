@@ -1,10 +1,19 @@
 /**
- * Tests for the pure Sites-step helpers: grouping, checkbox gating and the
- * "Next" enabled rule.
+ * Tests for the pure Sites-step helpers: grouping and the selection rules per
+ * selection mode.
  */
 
 import type { CandidateSite } from '@sudobility/raidr_agent_types';
-import { groupByLabel, needsSignIn, canSelect, isNextEnabled } from '../sites';
+import {
+  canAddMore,
+  groupByLabel,
+  initialSelection,
+  isNextEnabled,
+  isSingleSelection,
+  MAX_SELECTED_SITES,
+  nextSelection,
+  selectedInOrder,
+} from '../sites';
 
 function site(overrides: Partial<CandidateSite>): CandidateSite {
   return {
@@ -19,6 +28,8 @@ function site(overrides: Partial<CandidateSite>): CandidateSite {
   };
 }
 
+const hosts = (n: number) => Array.from({ length: n }, (_, i) => `h${i}`);
+
 describe('groupByLabel', () => {
   it('groups candidates by their first label, in first-seen order', () => {
     const groups = groupByLabel([
@@ -31,29 +42,52 @@ describe('groupByLabel', () => {
   });
 });
 
-describe('needsSignIn', () => {
-  it('is false only for authStyle "none"', () => {
-    expect(needsSignIn(site({ authStyle: 'none' }))).toBe(false);
-    expect(needsSignIn(site({ authStyle: 'bearer' }))).toBe(true);
-    expect(needsSignIn(site({ authStyle: 'cookie' }))).toBe(true);
-  });
-});
-
-describe('canSelect', () => {
-  it('always allows a no-sign-in site', () => {
-    expect(canSelect(site({ authStyle: 'none' }), new Set())).toBe(true);
+describe('nextSelection', () => {
+  it('single: picking a site replaces the choice', () => {
+    expect([...nextSelection('single', new Set(['a']), 'b')]).toEqual(['b']);
+    expect([...nextSelection('single', new Set(['a']), 'a')]).toEqual(['a']);
   });
 
-  it('blocks a sign-in site until its host is authorized', () => {
-    const s = site({ apiHost: 'api.x', authStyle: 'bearer' });
-    expect(canSelect(s, new Set())).toBe(false);
-    expect(canSelect(s, new Set(['api.x']))).toBe(true);
+  it('best/all: toggles', () => {
+    expect([...nextSelection('all', new Set(['a']), 'b')]).toEqual(['a', 'b']);
+    expect([...nextSelection('best', new Set(['a', 'b']), 'a')]).toEqual(['b']);
+  });
+
+  it('best/all: never exceeds the cap', () => {
+    const full = new Set(hosts(MAX_SELECTED_SITES));
+    expect(nextSelection('all', full, 'extra').size).toBe(MAX_SELECTED_SITES);
+    expect(canAddMore('all', full)).toBe(false);
+    expect(canAddMore('single', full)).toBe(true);
   });
 });
 
 describe('isNextEnabled', () => {
-  it('is disabled with nothing selected and enabled once one is', () => {
-    expect(isNextEnabled(new Set())).toBe(false);
-    expect(isNextEnabled(new Set(['api.x']))).toBe(true);
+  it('single needs exactly one', () => {
+    expect(isNextEnabled('single', new Set())).toBe(false);
+    expect(isNextEnabled('single', new Set(['a']))).toBe(true);
+    expect(isNextEnabled('single', new Set(['a', 'b']))).toBe(false);
+  });
+
+  it('best/all need 1..8', () => {
+    expect(isNextEnabled('all', new Set())).toBe(false);
+    expect(isNextEnabled('best', new Set(['a', 'b']))).toBe(true);
+    expect(isNextEnabled('all', new Set(hosts(9)))).toBe(false);
+  });
+});
+
+describe('initialSelection / selectedInOrder', () => {
+  const candidates = [site({ apiHost: 'a' }), site({ apiHost: 'b' })];
+
+  it('preselects the top site only for single', () => {
+    expect([...initialSelection('single', candidates)]).toEqual(['a']);
+    expect(initialSelection('all', candidates).size).toBe(0);
+    expect(initialSelection('single', []).size).toBe(0);
+    expect(isSingleSelection('best')).toBe(false);
+  });
+
+  it('keeps candidate order', () => {
+    expect(
+      selectedInOrder(candidates, new Set(['b', 'a'])).map(s => s.apiHost)
+    ).toEqual(['a', 'b']);
   });
 });

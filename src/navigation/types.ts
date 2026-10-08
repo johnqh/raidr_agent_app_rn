@@ -6,22 +6,27 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { ResultItem } from '@sudobility/raidr_agent_types';
 
+/** Result detail: the item, and why it was picked when it is the best one. */
+export type ResultDetailParams = { item: ResultItem; reason?: string };
+
 export type AskStackParamList = {
   Ask: undefined;
   Sites: undefined;
+  Prepare: undefined;
   Login: { apiHost: string };
   Results: undefined;
-  ResultDetail: { item: ResultItem };
+  ResultDetail: ResultDetailParams;
 };
 
 export type HistoryStackParamList = {
   History: undefined;
   HistoryRun: { runId: string; request: string };
-  ResultDetail: { item: ResultItem };
+  ResultDetail: ResultDetailParams;
 };
 
 export type SettingsStackParamList = {
   Settings: undefined;
+  ApiKeys: undefined;
 };
 
 // Root tab param list
@@ -36,6 +41,10 @@ export type AskScreenProps = NativeStackScreenProps<AskStackParamList, 'Ask'>;
 export type SitesScreenProps = NativeStackScreenProps<
   AskStackParamList,
   'Sites'
+>;
+export type PrepareScreenProps = NativeStackScreenProps<
+  AskStackParamList,
+  'Prepare'
 >;
 export type LoginScreenProps = NativeStackScreenProps<
   AskStackParamList,
@@ -59,6 +68,11 @@ export type HistoryRunScreenProps = NativeStackScreenProps<
 export type SettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
   'Settings'
+>;
+
+export type ApiKeysScreenProps = NativeStackScreenProps<
+  SettingsStackParamList,
+  'ApiKeys'
 >;
 
 // Tab screen props

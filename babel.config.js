@@ -73,6 +73,9 @@ module.exports = function (api) {
       ...(isMetro ? ['nativewind/babel'] : []),
     ],
     plugins: [
+      // zod 4 (used by raidr_agent_lib's run loop) ships `export * as ns`,
+      // which the React Native preset does not transform.
+      '@babel/plugin-transform-export-namespace-from',
       // Inline process.env.* references with their build-time values (see
       // INLINED_ENV above): React Native's runtime process.env is {}.
       [

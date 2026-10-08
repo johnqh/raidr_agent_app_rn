@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { AskStackParamList } from './types';
 import AskScreen from '@/screens/AskScreen';
 import SitesScreen from '@/screens/SitesScreen';
+import PrepareScreen from '@/screens/PrepareScreen';
 import LoginScreen from '@/screens/LoginScreen';
 import ResultsScreen from '@/screens/ResultsScreen';
 import ResultDetailScreen from '@/screens/ResultDetailScreen';
@@ -23,6 +24,11 @@ export function AskStack() {
         name='Sites'
         component={SitesScreen}
         options={{ title: t('sites.title') }}
+      />
+      <Stack.Screen
+        name='Prepare'
+        component={PrepareScreen}
+        options={{ title: t('prepare.title') }}
       />
       <Stack.Screen
         name='Login'

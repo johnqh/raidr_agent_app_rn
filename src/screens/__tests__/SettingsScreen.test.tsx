@@ -28,6 +28,9 @@ jest.mock('@/context/AuthContext', () => ({
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
+jest.mock('@/hooks/useLlmKeys', () => ({
+  useLlmKeys: () => ({ effective: [], configured: [] }),
+}));
 jest.mock('@/hooks/useTabBarHeight', () => ({ useTabBarHeight: () => 0 }));
 jest.mock('@/i18n', () => ({
   __esModule: true,

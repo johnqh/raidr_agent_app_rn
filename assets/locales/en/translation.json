@@ -26,19 +26,51 @@
     "otherLabel": "Other",
     "tools_one": "{{count}} tool",
     "tools_other": "{{count}} tools",
-    "auth": {
-      "none": "Open",
-      "required": "Sign-in"
-    },
-    "logIn": "Log in",
     "signedIn": "Signed in",
-    "next": "Next"
+    "next": "Next",
+    "pickOne": "Pick the site to use.",
+    "pickMany": "Pick up to {{max}} sites to compare."
+  },
+  "prepare": {
+    "title": "Prepare",
+    "loading": "Checking what each site needs...",
+    "error": "Could not prepare these sites.",
+    "retry": "Try again",
+    "noneSupported": "None of the chosen sites can handle this request. Go back and pick others.",
+    "signInHeading": "Sign-in",
+    "signInRequired": "Required",
+    "signInOptional": "Optional",
+    "requiredNote": "This request needs your account on this site.",
+    "fallbackNote": "Works signed out; sign in for more results.",
+    "signIn": "Sign in",
+    "signInForMore": "Sign in for more",
+    "signInTo": "Sign in to {{site}}",
+    "signInFirst": "Sign in to {{sites}} to run.",
+    "fillRequired": "Fill in the required fields to run.",
+    "formHeading": "Details",
+    "noForm": "No more details needed.",
+    "droppedHeading": "Left out",
+    "run": "Run",
+    "choose": "Choose...",
+    "listPlaceholder": "Comma-separated values",
+    "datePlaceholder": "Pick a date",
+    "dateTimePlaceholder": "YYYY-MM-DDTHH:mm",
+    "clear": "Clear",
+    "errors": {
+      "required": "Required.",
+      "number": "Enter a number.",
+      "date": "Enter a date as YYYY-MM-DD.",
+      "datetime": "Enter a date and time as YYYY-MM-DDTHH:mm.",
+      "option": "Choose one of the options."
+    }
   },
   "login": {
     "title": "Sign in",
     "subtitle": "Sign in to {{host}}; the window closes by itself.",
     "close": "Close",
-    "error": "Could not load sign-in for this site."
+    "error": "Could not load sign-in for this site.",
+    "popupTitle": "Sign-in window · {{host}}",
+    "closePopup": "Close window"
   },
   "results": {
     "title": "Results",
@@ -60,7 +92,16 @@
       "extracting": "Extracting",
       "done": "Done",
       "failed": "Failed"
-    }
+    },
+    "best": "Best result",
+    "whyBest": "Why this one",
+    "seeAll_one": "See all {{count}} result",
+    "seeAll_other": "See all {{count}} results",
+    "showBest": "Best",
+    "soFar_one": "{{count}} result so far...",
+    "soFar_other": "{{count}} results so far...",
+    "signInNeeded": "This site refused the request without signing in.",
+    "signInRetry": "Sign in to {{site}} and retry"
   },
   "resultDetail": {
     "title": "Detail",
@@ -70,7 +111,9 @@
     "minutes_other": "{{count}} min",
     "servings_one": "{{count}} serving",
     "servings_other": "{{count}} servings",
-    "viewSource": "View source"
+    "viewSource": "View source",
+    "openOn": "Open on {{site}}",
+    "theSite": "the site"
   },
   "history": {
     "title": "History",
@@ -101,7 +144,41 @@
     "signInDescription": "Sync data across devices",
     "about": "About",
     "version": "Version 1.0.0",
-    "copyright": "2024 {{companyName}}"
+    "copyright": "2024 {{companyName}}",
+    "agent": "Agent",
+    "apiKeys": "API Keys",
+    "apiKeysDescription": "Run requests with your own AI provider key",
+    "agentMode": {
+      "cloud": "Cloud",
+      "local": "Local",
+      "localWith": "Local · {{provider}}"
+    }
+  },
+  "apiKeys": {
+    "title": "API Keys",
+    "modeSection": "Mode",
+    "mode": {
+      "cloud": "Cloud",
+      "local": "Local"
+    },
+    "cloudDescription": "raidr runs your request. No key needed.",
+    "localDescription": "Your request is planned by your chosen AI provider using your own key. Site sign-ins stay on this device.",
+    "localDisabled": "Save a key for at least one provider below to turn on Local.",
+    "providersSection": "Providers",
+    "orderNote": "The top provider with a saved key is used; the others are fallbacks, tried in order. Drag the handle to reorder.",
+    "storageNote": "Keys are kept in this device's secure storage and only shown masked.",
+    "keySaved": "Key saved",
+    "noKey": "No key",
+    "keyLabel": "{{provider}} API key",
+    "save": "Save",
+    "remove": "Remove",
+    "removeTitle": "Remove key?",
+    "removeMessage": "Your {{provider}} key will be deleted from this device.",
+    "getKey": "Get a {{provider}} key",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "dragHandle": "Reorder {{provider}}",
+    "rowHint": "Opens the key editor"
   },
   "auth": {
     "signIn": "Sign In",

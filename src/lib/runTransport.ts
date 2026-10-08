@@ -11,8 +11,8 @@
  *
  * `DefaultChatTransport` + `useChat` are built around an assistant *message*
  * whose `parts` you re-render. This run carries only custom data parts
- * (`data-run`, `data-site-status`, `data-call`, `data-result`) and no assistant
- * text, and the screen wants them as four growing lists keyed by id — not as one
+ * (`data-run`, `data-site-status`, `data-call`, `data-result`, `data-best`) and no assistant
+ * text, and the screen wants them as growing lists keyed by id — not as one
  * message to diff. Reading the stream directly is both simpler and fully typed
  * here: there is no `prepareSendMessagesRequest` generic to satisfy and no
  * message assembly to undo. The chunk shape we parse is exactly the AI SDK UI
@@ -31,6 +31,7 @@ import type {
   TokenGetter,
 } from '@sudobility/raidr_agent_client';
 import type {
+  BestData,
   CallData,
   ResultItem,
   RunData,
@@ -43,7 +44,8 @@ export type RunStreamPart =
   | { type: 'run'; data: RunData }
   | { type: 'site-status'; data: SiteStatusData }
   | { type: 'call'; data: CallData }
-  | { type: 'result'; data: ResultItem };
+  | { type: 'result'; data: ResultItem }
+  | { type: 'best'; data: BestData };
 
 /** Callbacks the run reader invokes as the stream progresses. */
 export interface RunCallbacks {
@@ -79,6 +81,8 @@ function toRunPart(chunk: RawChunk): RunStreamPart | null {
       return { type: 'call', data: chunk.data as CallData };
     case 'data-result':
       return { type: 'result', data: chunk.data as ResultItem };
+    case 'data-best':
+      return { type: 'best', data: chunk.data as BestData };
     default:
       return null;
   }

@@ -1,14 +1,20 @@
 /**
- * Transient state for one pass through the Ask → Sites → Results flow.
+ * Transient state for one pass through the Ask → Sites → Prepare → Results flow.
  *
- * The classified intent and its candidate sites are too heavy to thread through
- * navigation params (and React Navigation warns about non-serialisable params),
- * so the Ask step stashes them here and the later steps read them back. This is
- * in-memory only and is cleared when a new request is classified.
+ * The understood intent, its candidate sites, the prepared plan and the form
+ * answers are too heavy to thread through navigation params (and React
+ * Navigation warns about non-serialisable params), so each step stashes them
+ * here and the later steps read them back. This is in-memory only and is
+ * cleared when a new request is understood.
  */
 
 import { create } from 'zustand';
-import type { AgentIntent, CandidateSite } from '@sudobility/raidr_agent_types';
+import type {
+  AgentIntent,
+  CandidateSite,
+  FormValue,
+  PrepareResponse,
+} from '@sudobility/raidr_agent_types';
 
 export interface Coordinates {
   latitude: number;
@@ -20,18 +26,26 @@ export interface Coordinates {
 interface RunFlowState {
   /** The raw request the user typed. */
   request: string;
-  /** The classified intent, or `null` before classification. */
+  /** The understood intent, or `null` before the Ask step. */
   intent: AgentIntent | null;
-  /** Candidate sites for the intent. */
+  /** Candidate sites for the intent, best first. */
   candidates: CandidateSite[];
   location: Coordinates | null;
-  /** Record a freshly classified request and its candidates. */
+  /** The Prepare step's per-site plans and merged form, or `null` before it. */
+  plan: PrepareResponse | null;
+  /** The form answers the run sends (`RunRequest.inputs`). */
+  inputs: Record<string, FormValue>;
+  /** Record a freshly understood request and its candidates (clears the plan). */
   setFlow: (
     request: string,
     intent: AgentIntent,
     candidates: CandidateSite[],
     location: Coordinates | null
   ) => void;
+  /** Record the Prepare step's plan (clears earlier inputs). */
+  setPlan: (plan: PrepareResponse | null) => void;
+  /** Record the form answers for the run. */
+  setInputs: (inputs: Record<string, FormValue>) => void;
   /** Clear the flow back to its empty defaults. */
   clear: () => void;
 }
@@ -41,12 +55,16 @@ const initialState = {
   intent: null as AgentIntent | null,
   candidates: [] as CandidateSite[],
   location: null as Coordinates | null,
+  plan: null as PrepareResponse | null,
+  inputs: {} as Record<string, FormValue>,
 };
 
 /** Zustand store hook for the current run flow. */
 export const useRunFlowStore = create<RunFlowState>(set => ({
   ...initialState,
   setFlow: (request, intent, candidates, location) =>
-    set({ request, intent, candidates, location }),
+    set({ request, intent, candidates, location, plan: null, inputs: {} }),
+  setPlan: plan => set({ plan, inputs: {} }),
+  setInputs: inputs => set({ inputs }),
   clear: () => set(initialState),
 }));

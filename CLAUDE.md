@@ -14,11 +14,10 @@ Platforms: **iOS, iPadOS, Android phone and tablet, macOS, Windows**.
 registry/component name **`RaidrAgent`**, bundle/application ID
 **`com.sudobility.raidragent`** everywhere.
 
-> **Status: shell only.** Scaffolded 2026-10-02 from `mogulgame_app_rn` (itself the
-> company starter template). There are two tabs: **Ask** (a text input and a
-> disabled "Go" button — the entry point the feature will fill in) and
-> **Settings**. No agent logic, web view, Keychain or AI SDK code exists yet;
-> the dependencies are installed and the AI SDK polyfills are wired.
+> **Status:** scaffolded 2026-10-02 from `mogulgame_app_rn`. Tabs: **Ask**
+> (Ask → Sites → Login web view → Results → ResultDetail), **History** and
+> **Settings** (→ **API Keys**). Runs go to the cloud (`POST /runs`) or, in
+> local mode, run on the device (see "Local agent mode").
 
 ## Tech stack
 
@@ -117,6 +116,66 @@ macOS and Windows have no `expo/fetch` and need their own streaming fetch.
 `@ai-sdk/react` 4 declares `react: ~19.1.2`, and RN 0.81 pins `react` 19.1.0
 (the renderer must match exactly), so bun prints an "incorrect peer dependency"
 warning. It is expected; do not bump `react` past what RN 0.81 ships.
+
+## Agent flow
+
+Ask → Sites → Prepare → Results (`src/navigation/AskStack.tsx`); transient
+state in `src/stores/runFlowStore.ts` (request, intent, candidates, location,
+`plan`, `inputs`). `src/lib/agentFlow.ts` picks cloud or local per call and is
+the only place the cloud flow calls `RaidrAgentClient`.
+
+- **Ask**: `understandRequest` with the device context (`src/lib/deviceContext.ts`:
+  country via `react-native-localize`, locale, time zone, `now` with offset).
+  Returns the six-W `AgentIntent` (incl. `selection`) and ranked candidates (with `reason`).
+- **Sites**: `single` → radio (exactly one, top one preselected); `best`/`all` →
+  checkboxes (1–8). Rules in `src/lib/sites.ts`.
+- **Prepare** (`PrepareScreen`): per-site plans (tools, `login`
+  required/fallback/none, `unsupported`) and one merged `FormField[]` form
+  (`src/components/PreparedFormField.tsx`). Run needs a valid form and every
+  `required` site signed in. Rules (validation/coercion, readiness, run sites,
+  401/403 retry) in `src/lib/prepare.ts`. Tokens go with `required` and
+  `fallback` sites when stored, never with `none` sites.
+- **Results**: `single`/`best` show the `data-best` pick in full with its reason
+  and "See all N results"; `all` lists (map toggle for location intents). A
+  `fallback` site whose calls all failed 401/403 offers "Sign in to <site> and
+  retry" (re-runs that site only). Detail's "Open on <site>" opens `pageUrl`
+  with `Linking.openURL`; hidden when `pageUrl` is ''. History renders runs the
+  same way from `RunDetail.best`. Rules in `src/lib/results.ts`.
+- **Login web view**: `window.open` popups open in a second `WebView` over the
+  first (same cookie store, same capture script, a bridge shimming
+  `window.opener.postMessage` / `window.close()`); Google sign-in pages switch
+  that web view to a standard browser user agent by cancelling the load and
+  remounting with a new `key` (sticky afterwards). Windows uses WebView2 for
+  popups and skips the UA switch (no `userAgent` prop; Edge UA already passes).
+  Pure helpers in `src/lib/webAuth.ts`.
+
+## Local agent mode
+
+Settings → API Keys (`ApiKeysScreen`) holds the user's own OpenAI / Anthropic /
+DeepSeek / OpenRouter keys (Keychain service `raidr-agent-llm:<provider>`,
+`src/lib/llmKeys.ts`), a drag-ordered provider list and a Cloud / Local switch
+(`settingsStore.agentMode`, default cloud; local needs ≥1 key and falls back to
+cloud when the last key is removed). Pure rules: `src/lib/agentMode.ts`,
+`src/lib/reorder.ts`.
+
+`src/lib/localAgent.ts` runs local mode: `understandLocally`
+(`understandIntent` → `POST /candidates` → `rankSites`), `prepareLocally`
+(`prepareSites` with site context from `GET /sites/:apiHost/context`) and
+`startLocalRun` (`runSites` with tools/inputs, forwarding `data-best`). For each
+model step (understand, rank-sites, prepare, plan, extract, pick-best) it gets the provider request from raidr_agent_api `POST /llm/payload`
+(which proxies ShapeShyft `/prompt` with `llm_provider`), adds the user's key per
+`request.auth`, calls the provider directly and parses the reply with
+`parseProviderResponse` from `@sudobility/shapeshyft_engine/core` (the RN-safe
+subpath — never import the engine root). Providers are tried in the user's
+order; a failure falls through to the next. The run loop is
+`raidr_agent_lib/runner` (the same one the server runs); site calls go straight
+to the site (`DirectSiteConnector`), manifests come from the site context, and the finished run is uploaded to
+`POST /runs/import` for History. The user's LLM key and site tokens stay on the
+device; the step inputs (including site response excerpts) do pass through
+raidr_agent_api and ShapeShyft to build each payload.
+
+`babel.config.js` includes `@babel/plugin-transform-export-namespace-from`
+because zod 4 (pulled in by the runner) uses `export * as`.
 
 ## Sibling packages
 

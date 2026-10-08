@@ -1,134 +1,132 @@
 /**
  * Sites screen — pick which sites the run should call.
  *
- * Candidates are grouped under their first label. A site with no sign-in
- * (`authStyle === 'none'`) can be checked immediately; a site that needs
- * sign-in stays disabled until a token is stored for its `apiHost` (shown as
- * "Signed in"), which happens through the Login web view. "Next" is enabled once
- * at least one site is checked.
+ * Candidates arrive ranked best-first, each with the reason it was suggested,
+ * grouped under their first label. The intent's selection mode decides the
+ * control: `single` is a radio list (exactly one site; the top one starts
+ * chosen), `best` / `all` are checkboxes (1–8 sites). Signing in is decided
+ * in the next step: "Next" goes to Prepare, which works out which chosen
+ * sites need it.
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
-import { Text, Button, Badge, Checkbox } from '@sudobility/components-rn';
+import { Text, Button, Checkbox } from '@sudobility/components-rn';
 import { useTranslation } from 'react-i18next';
 import { useSelectionStore } from '@sudobility/raidr_agent_lib';
 import type { CandidateSite } from '@sudobility/raidr_agent_types';
 import { useTabBarHeight } from '@/hooks/useTabBarHeight';
 import { useRunFlowStore } from '@/stores/runFlowStore';
-import { getSiteToken } from '@/lib/secureStorage';
 import {
+  canAddMore,
   groupByLabel,
-  canSelect,
-  needsSignIn,
   isNextEnabled,
+  isSingleSelection,
+  MAX_SELECTED_SITES,
+  nextSelection,
 } from '@/lib/sites';
 import { trackScreenView, trackButtonClick } from '@/analytics';
 import type { SitesScreenProps } from '@/navigation/types';
+
+/** A radio mark: a ring, filled when chosen. */
+function RadioMark({ checked }: { checked: boolean }) {
+  return (
+    <View
+      className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
+        checked ? 'border-primary' : 'border-foreground/30'
+      }`}
+    >
+      {checked ? <View className='w-3 h-3 rounded-full bg-primary' /> : null}
+    </View>
+  );
+}
 
 export default function SitesScreen({ navigation }: SitesScreenProps) {
   const { t } = useTranslation();
   const tabBarHeight = useTabBarHeight();
 
   const candidates = useRunFlowStore(s => s.candidates);
-  const { selected, authorized, toggle, setAuthorized } = useSelectionStore();
+  const mode = useRunFlowStore(s => s.intent?.selection ?? 'all');
+  const selected = useSelectionStore(s => s.selected);
+  const select = useSelectionStore(s => s.select);
 
   useEffect(() => {
     trackScreenView('Sites');
   }, []);
 
-  // Seed `authorized` from the Keychain: a site we already hold a token for is
-  // immediately selectable. Re-run on focus so a token stored in the Login step
-  // is reflected on return.
-  const seedAuthorized = useCallback(() => {
-    let cancelled = false;
-    (async () => {
-      for (const site of candidates) {
-        if (!needsSignIn(site)) {
-          continue;
-        }
-        const token = await getSiteToken(site.apiHost);
-        if (!cancelled && token) {
-          setAuthorized(site.apiHost, true);
+  const single = isSingleSelection(mode);
+  const groups = groupByLabel(candidates);
+  const nextEnabled = isNextEnabled(mode, selected);
+  const roomForMore = canAddMore(mode, selected);
+
+  const choose = useCallback(
+    (apiHost: string) => {
+      const current = useSelectionStore.getState().selected;
+      const next = nextSelection(mode, current, apiHost);
+      for (const host of current) {
+        if (!next.has(host)) {
+          select(host, false);
         }
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [candidates, setAuthorized]);
-
-  useFocusEffect(seedAuthorized);
-
-  const groups = groupByLabel(candidates);
-  const nextEnabled = isNextEnabled(selected);
+      for (const host of next) {
+        if (!current.has(host)) {
+          select(host, true);
+        }
+      }
+    },
+    [mode, select]
+  );
 
   const handleNext = useCallback(() => {
-    trackButtonClick('sites_next');
-    navigation.navigate('Results');
-  }, [navigation]);
+    trackButtonClick('sites_next', { selection: mode, count: selected.size });
+    navigation.navigate('Prepare');
+  }, [navigation, mode, selected.size]);
 
   const renderRow = (site: CandidateSite) => {
-    const checkable = canSelect(site, authorized);
-    const isAuthorized = authorized.has(site.apiHost);
+    const checked = selected.has(site.apiHost);
+    const disabled = !checked && !roomForMore;
     return (
-      <View
+      <Pressable
         key={site.apiHost}
-        className='flex-row items-center py-3 px-4 border-t border-foreground/10'
+        onPress={() => choose(site.apiHost)}
+        disabled={disabled}
+        accessibilityRole={single ? 'radio' : 'checkbox'}
+        accessibilityState={{ checked, disabled }}
+        accessibilityLabel={site.title}
+        className={`flex-row items-center py-3 px-4 border-t border-foreground/10 ${
+          disabled ? 'opacity-50' : ''
+        }`}
       >
         <View className='flex-1 mr-3'>
-          <View className='flex-row items-center mb-1'>
-            <Badge
-              variant={needsSignIn(site) ? 'warning' : 'success'}
-              size='sm'
-            >
-              {needsSignIn(site)
-                ? t('sites.auth.required')
-                : t('sites.auth.none')}
-            </Badge>
-            <Text size='xs' color='muted' className='ml-2'>
-              {t('sites.tools', { count: site.toolCount })}
-            </Text>
-          </View>
           <Text size='base' weight='semibold'>
             {site.title}
           </Text>
+          {site.reason ? (
+            <Text size='sm' className='mt-0.5'>
+              {site.reason}
+            </Text>
+          ) : null}
           {site.description ? (
-            <Text size='sm' color='muted' numberOfLines={2}>
+            <Text size='sm' color='muted' numberOfLines={2} className='mt-0.5'>
               {site.description}
             </Text>
           ) : null}
-          {needsSignIn(site) ? (
-            <View className='mt-2 flex-row'>
-              {isAuthorized ? (
-                <Text size='sm' color='success'>
-                  {t('sites.signedIn')}
-                </Text>
-              ) : (
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onPress={() => {
-                    trackButtonClick('sites_login');
-                    navigation.navigate('Login', { apiHost: site.apiHost });
-                  }}
-                  accessibilityLabel={t('sites.logIn')}
-                >
-                  {t('sites.logIn')}
-                </Button>
-              )}
-            </View>
-          ) : null}
+          <Text size='xs' color='muted' className='mt-1'>
+            {t('sites.tools', { count: site.toolCount })}
+          </Text>
         </View>
-        <Checkbox
-          checked={selected.has(site.apiHost)}
-          disabled={!checkable}
-          onChange={() => toggle(site.apiHost)}
-          accessibilityLabel={site.title}
-        />
-      </View>
+        {single ? (
+          <RadioMark checked={checked} />
+        ) : (
+          <Checkbox
+            checked={checked}
+            disabled={disabled}
+            onChange={() => choose(site.apiHost)}
+            accessibilityLabel={site.title}
+          />
+        )}
+      </Pressable>
     );
   };
 
@@ -147,22 +145,29 @@ export default function SitesScreen({ navigation }: SitesScreenProps) {
             </Text>
           </View>
         ) : (
-          groups.map(group => (
-            <View key={group.label || 'other'} className='mb-6'>
-              <Text
-                size='sm'
-                weight='semibold'
-                color='muted'
-                transform='uppercase'
-                className='mb-2 px-4 tracking-wide'
-              >
-                {group.label || t('sites.otherLabel')}
-              </Text>
-              <View className='rounded-lg overflow-hidden bg-card [&>*:first-child]:border-t-0'>
-                {group.sites.map(renderRow)}
+          <>
+            <Text size='sm' color='muted' className='mb-4 px-4'>
+              {single
+                ? t('sites.pickOne')
+                : t('sites.pickMany', { max: MAX_SELECTED_SITES })}
+            </Text>
+            {groups.map(group => (
+              <View key={group.label || 'other'} className='mb-6'>
+                <Text
+                  size='sm'
+                  weight='semibold'
+                  color='muted'
+                  transform='uppercase'
+                  className='mb-2 px-4 tracking-wide'
+                >
+                  {group.label || t('sites.otherLabel')}
+                </Text>
+                <View className='rounded-lg overflow-hidden bg-card [&>*:first-child]:border-t-0'>
+                  {group.sites.map(renderRow)}
+                </View>
               </View>
-            </View>
-          ))
+            ))}
+          </>
         )}
       </ScrollView>
       <View
