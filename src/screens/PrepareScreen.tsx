@@ -20,16 +20,17 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Text, Button, Badge, Spinner } from '@sudobility/components-rn';
 import { useTranslation } from 'react-i18next';
 import { useSelectionStore } from '@sudobility/raidr_agent_lib';
 import type { PrepareResponse, SitePlan } from '@sudobility/raidr_agent_types';
-import { useTabBarHeight } from '@/hooks/useTabBarHeight';
+import Screen from '@/components/layout/Screen';
 import { useAgentClient } from '@/hooks/useAgentClient';
 import { useAuth } from '@/context/AuthContext';
+import SiteIcon from '@/components/SiteIcon';
+import { useSiteBadges } from '@/hooks/useSiteBadges';
 import { useRunFlowStore } from '@/stores/runFlowStore';
 import { getSiteToken } from '@/lib/secureStorage';
 import { prepareRequest } from '@/lib/agentFlow';
@@ -56,13 +57,28 @@ import type { PrepareScreenProps } from '@/navigation/types';
 
 export default function PrepareScreen({ navigation }: PrepareScreenProps) {
   const { t } = useTranslation();
-  const tabBarHeight = useTabBarHeight();
 
   const request = useRunFlowStore(s => s.request);
   const intent = useRunFlowStore(s => s.intent);
   const candidates = useRunFlowStore(s => s.candidates);
   const location = useRunFlowStore(s => s.location);
   const plan = useRunFlowStore(s => s.plan);
+  // Sites go by their domain and icon here too, like the Sites step.
+  const planHosts = useMemo(
+    () => (plan?.sites ?? []).map(p => p.apiHost),
+    [plan]
+  );
+  const badges = useSiteBadges(planHosts);
+  const nameOf = (site: SitePlan) => badges[site.apiHost]?.domain ?? site.title;
+  const iconOf = (site: SitePlan, size: number) => (
+    <SiteIcon
+      {...(badges[site.apiHost]?.iconUrl
+        ? { iconUrl: badges[site.apiHost]!.iconUrl }
+        : {})}
+      domain={nameOf(site)}
+      size={size}
+    />
+  );
   const setPlan = useRunFlowStore(s => s.setPlan);
   const setInputs = useRunFlowStore(s => s.setInputs);
 
@@ -204,10 +220,11 @@ export default function PrepareScreen({ navigation }: PrepareScreenProps) {
         }`}
       >
         <View className='flex-row items-center justify-between'>
+          <View className='mr-3 self-start'>{iconOf(site, 32)}</View>
           <View className='flex-1 mr-3'>
             <View className='flex-row items-center mb-1'>
               <Text size='base' weight='semibold' className='mr-2'>
-                {site.title}
+                {nameOf(site)}
               </Text>
               <Badge variant={required ? 'warning' : 'info'} size='sm'>
                 {required
@@ -231,7 +248,7 @@ export default function PrepareScreen({ navigation }: PrepareScreenProps) {
               variant={required ? 'primary' : 'outline'}
               size='sm'
               onPress={() => signIn(site)}
-              accessibilityLabel={t('prepare.signInTo', { site: site.title })}
+              accessibilityLabel={t('prepare.signInTo', { site: nameOf(site) })}
             >
               {required ? t('prepare.signIn') : t('prepare.signInForMore')}
             </Button>
@@ -250,156 +267,147 @@ export default function PrepareScreen({ navigation }: PrepareScreenProps) {
     ? sitesRequiringSignIn(plan).filter(s => !authorized.has(s.apiHost))
     : [];
 
+  const footer = (
+    <>
+      {plan && missingSignIn.length > 0 ? (
+        <Text size='xs' color='muted' className='mb-2'>
+          {t('prepare.signInFirst', {
+            sites: missingSignIn.map(nameOf).join(', '),
+          })}
+        </Text>
+      ) : plan && form && !form.valid ? (
+        <Text size='xs' color='muted' className='mb-2'>
+          {t('prepare.fillRequired')}
+        </Text>
+      ) : null}
+      <Button
+        variant='primary'
+        disabled={!ready || loading}
+        onPress={handleRun}
+        accessibilityLabel={t('prepare.run')}
+        testID='prepare-run'
+      >
+        {t('prepare.run')}
+      </Button>
+    </>
+  );
+
   return (
-    <SafeAreaView className='flex-1 bg-background' edges={['left', 'right']}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: tabBarHeight + 112 },
-        ]}
-        keyboardShouldPersistTaps='handled'
-      >
-        {loading ? (
-          <View className='flex-row items-center py-6'>
-            <Spinner size='small' />
-            <Text size='sm' color='muted' className='ml-2'>
-              {t('prepare.loading')}
-            </Text>
+    <Screen title={t('prepare.title')} footer={footer}>
+      {loading ? (
+        <View className='flex-row items-center py-6'>
+          <Spinner size='small' />
+          <Text size='sm' color='muted' className='ml-2'>
+            {t('prepare.loading')}
+          </Text>
+        </View>
+      ) : error || !plan ? (
+        <View className='py-6'>
+          <Text size='sm' color='danger'>
+            {t('prepare.error')}
+            {error ? `\n${error}` : ''}
+          </Text>
+          <View className='flex-row mt-4'>
+            <Button
+              variant='outline'
+              onPress={() => setAttempt(n => n + 1)}
+              accessibilityLabel={t('prepare.retry')}
+            >
+              {t('prepare.retry')}
+            </Button>
           </View>
-        ) : error || !plan ? (
-          <View className='py-6'>
-            <Text size='sm' color='danger'>
-              {t('prepare.error')}
-              {error ? `\n${error}` : ''}
+        </View>
+      ) : (
+        <>
+          {runnable.length === 0 ? (
+            <Text size='sm' color='danger' className='mb-6'>
+              {t('prepare.noneSupported')}
             </Text>
-            <View className='flex-row mt-4'>
-              <Button
-                variant='outline'
-                onPress={() => setAttempt(n => n + 1)}
-                accessibilityLabel={t('prepare.retry')}
+          ) : null}
+
+          {signInSites.length > 0 ? (
+            <>
+              <Text
+                size='sm'
+                weight='semibold'
+                color='muted'
+                transform='uppercase'
+                className='mb-2 px-1 tracking-wide'
               >
-                {t('prepare.retry')}
-              </Button>
-            </View>
-          </View>
-        ) : (
-          <>
-            {runnable.length === 0 ? (
-              <Text size='sm' color='danger' className='mb-6'>
-                {t('prepare.noneSupported')}
+                {t('prepare.signInHeading')}
               </Text>
-            ) : null}
+              <View className='rounded-lg overflow-hidden bg-card mb-6'>
+                {signInSites.map(renderSignInRow)}
+              </View>
+            </>
+          ) : null}
 
-            {signInSites.length > 0 ? (
-              <>
-                <Text
-                  size='sm'
-                  weight='semibold'
-                  color='muted'
-                  transform='uppercase'
-                  className='mb-2 px-1 tracking-wide'
-                >
-                  {t('prepare.signInHeading')}
-                </Text>
-                <View className='rounded-lg overflow-hidden bg-card mb-6'>
-                  {signInSites.map(renderSignInRow)}
-                </View>
-              </>
-            ) : null}
-
-            {plan.form.length > 0 ? (
-              <>
-                <Text
-                  size='sm'
-                  weight='semibold'
-                  color='muted'
-                  transform='uppercase'
-                  className='mb-2 px-1 tracking-wide'
-                >
-                  {t('prepare.formHeading')}
-                </Text>
-                <View className='rounded-lg bg-card p-4 mb-6'>
-                  {plan.form.map(field => (
-                    <PreparedFormField
-                      key={field.name}
-                      field={field}
-                      value={draft[field.name]}
-                      onChange={value => setField(field.name, value)}
-                      error={
-                        touched.has(field.name)
-                          ? form?.errors[field.name]
-                          : undefined
-                      }
-                    />
-                  ))}
-                </View>
-              </>
-            ) : runnable.length > 0 ? (
-              <Text size='sm' color='muted' className='mb-6 px-1'>
-                {t('prepare.noForm')}
+          {plan.form.length > 0 ? (
+            <>
+              <Text
+                size='sm'
+                weight='semibold'
+                color='muted'
+                transform='uppercase'
+                className='mb-2 px-1 tracking-wide'
+              >
+                {t('prepare.formHeading')}
               </Text>
-            ) : null}
+              <View className='rounded-lg bg-card p-4 mb-6'>
+                {plan.form.map(field => (
+                  <PreparedFormField
+                    key={field.name}
+                    field={field}
+                    value={draft[field.name]}
+                    onChange={value => setField(field.name, value)}
+                    error={
+                      touched.has(field.name)
+                        ? form?.errors[field.name]
+                        : undefined
+                    }
+                  />
+                ))}
+              </View>
+            </>
+          ) : runnable.length > 0 ? (
+            <Text size='sm' color='muted' className='mb-6 px-1'>
+              {t('prepare.noForm')}
+            </Text>
+          ) : null}
 
-            {dropped.length > 0 ? (
-              <>
-                <Text
-                  size='sm'
-                  weight='semibold'
-                  color='muted'
-                  transform='uppercase'
-                  className='mb-2 px-1 tracking-wide'
-                >
-                  {t('prepare.droppedHeading')}
-                </Text>
-                <View className='rounded-lg overflow-hidden bg-card mb-6'>
-                  {dropped.map((site, index) => (
-                    <View
-                      key={site.apiHost}
-                      className={`py-3 px-4 ${
-                        index > 0 ? 'border-t border-foreground/10' : ''
-                      }`}
-                    >
-                      <Text size='base'>{site.title}</Text>
-                      <Text size='sm' color='muted'>
-                        {site.unsupported}
-                      </Text>
+          {dropped.length > 0 ? (
+            <>
+              <Text
+                size='sm'
+                weight='semibold'
+                color='muted'
+                transform='uppercase'
+                className='mb-2 px-1 tracking-wide'
+              >
+                {t('prepare.droppedHeading')}
+              </Text>
+              <View className='rounded-lg overflow-hidden bg-card mb-6'>
+                {dropped.map((site, index) => (
+                  <View
+                    key={site.apiHost}
+                    className={`py-3 px-4 ${
+                      index > 0 ? 'border-t border-foreground/10' : ''
+                    }`}
+                  >
+                    <View className='flex-row items-center'>
+                      <View className='mr-2'>{iconOf(site, 20)}</View>
+                      <Text size='base'>{nameOf(site)}</Text>
                     </View>
-                  ))}
-                </View>
-              </>
-            ) : null}
-          </>
-        )}
-      </ScrollView>
-      <View
-        className='absolute left-0 right-0 bottom-0 px-4 pt-3 bg-background border-t border-foreground/10'
-        style={{ paddingBottom: tabBarHeight + 12 }}
-      >
-        {plan && missingSignIn.length > 0 ? (
-          <Text size='xs' color='muted' className='mb-2'>
-            {t('prepare.signInFirst', {
-              sites: missingSignIn.map(s => s.title).join(', '),
-            })}
-          </Text>
-        ) : plan && form && !form.valid ? (
-          <Text size='xs' color='muted' className='mb-2'>
-            {t('prepare.fillRequired')}
-          </Text>
-        ) : null}
-        <Button
-          variant='primary'
-          disabled={!ready || loading}
-          onPress={handleRun}
-          accessibilityLabel={t('prepare.run')}
-          testID='prepare-run'
-        >
-          {t('prepare.run')}
-        </Button>
-      </View>
-    </SafeAreaView>
+                    <Text size='sm' color='muted'>
+                      {site.unsupported}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          ) : null}
+        </>
+      )}
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: { padding: 16, width: '100%', maxWidth: 720, alignSelf: 'center' },
-});

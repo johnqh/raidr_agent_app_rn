@@ -8,7 +8,7 @@
     "loopOrder": "languages_first"
   },
   "build": {
-    "metroPort": 8090,
+    "metroPort": 8094,
     "ios": {
       "appName": "RaidrAgent",
       "workspace": "RaidrAgent.xcworkspace",
@@ -21,8 +21,8 @@
   },
   "app": {
     "name": "raidr agent",
-    "bundleId": "com.sudobility.raidragent",
-    "packageName": "com.sudobility.raidragent",
+    "bundleId": "com.sudobility.raidr.agent",
+    "packageName": "com.sudobility.raidr.agent",
     "developer": "Sudobility",
     "website": "https://raidr.dev",
     "supportUrl": "https://raidr.dev/support",

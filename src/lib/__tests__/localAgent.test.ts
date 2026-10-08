@@ -172,7 +172,7 @@ describe('understandLocally', () => {
   it('understands with the device context, then ranks the label candidates', async () => {
     mocked.understandIntent.mockResolvedValueOnce(intent);
     mocked.rankSites.mockResolvedValueOnce([site('b')]);
-    const client = {
+    const client: Record<string, jest.Mock> = {
       getCandidates: jest.fn(async () => ({
         success: true,
         data: [site('a'), site('b')],
@@ -206,6 +206,14 @@ describe('understandLocally', () => {
       candidates: [site('a'), site('b')],
     });
     expect(result).toEqual({ intent, candidates: [site('b')] });
+    // Ranking reads each candidate's manifest through the API.
+    client.getSiteManifest = jest.fn(async () => ({
+      success: true,
+      data: { apiHost: 'a' },
+    }));
+    const manifests = mocked.rankSites.mock.calls[0][2];
+    await expect(manifests.manifest('a')).resolves.toEqual({ apiHost: 'a' });
+    expect(client.getSiteManifest).toHaveBeenCalledWith('a', 'firebase-token');
   });
 
   it('skips ranking when no site matches', async () => {

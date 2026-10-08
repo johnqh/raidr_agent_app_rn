@@ -1,4 +1,4 @@
-package com.sudobility.raidragent
+package com.sudobility.raidr.agent
 
 import android.content.Intent
 import android.os.Build

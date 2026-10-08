@@ -15,10 +15,23 @@
     "classifying": "Finding the right sites...",
     "locating": "Getting your location...",
     "locationRequired": "Location access is needed for this request. Enable location services and try again.",
-    "locationDisclosureTitle": "Use your location?",
-    "locationDisclosure": "Your device location will be sent to ShapeShyft to find nearby results.",
     "error": "Could not understand that request. Try rephrasing it.",
     "comingSoon": "Coming soon: raidr agent will pick the right sites, sign you in and stream the results here."
+  },
+  "permission": {
+    "title": "Permission",
+    "notNow": "Not now",
+    "tryAgain": "Try again",
+    "openSettings": "Open Settings",
+    "location": {
+      "navTitle": "Location",
+      "title": "Find what is near you",
+      "body": "This request is about places around you. raidr agent uses your current location to search nearby.",
+      "privacy": "Your location is sent to ShapeShyft and the sites you pick, only for this request.",
+      "allow": "Allow location access",
+      "working": "Getting your location…",
+      "refused": "raidr agent could not get your location. Turn on location access for raidr agent in Settings, then try again."
+    }
   },
   "sites": {
     "title": "Choose sites",
@@ -101,7 +114,16 @@
     "soFar_one": "{{count}} result so far...",
     "soFar_other": "{{count}} results so far...",
     "signInNeeded": "This site refused the request without signing in.",
-    "signInRetry": "Sign in to {{site}} and retry"
+    "signInRetry": "Sign in to {{site}} and retry",
+    "onSites_one": "On {{count}} site",
+    "onSites_other": "On {{count}} sites",
+    "allTitle_one": "{{count}} result",
+    "allTitle_other": "All {{count}} results"
+  },
+  "resultSources": {
+    "title": "Choose a site",
+    "subtitle_one": "Listed on {{count}} site. Pick where to continue.",
+    "subtitle_other": "Listed on {{count}} sites. Pick where to continue."
   },
   "resultDetail": {
     "title": "Detail",

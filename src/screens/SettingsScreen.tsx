@@ -13,10 +13,9 @@
  */
 
 import React, { useCallback, useState, useEffect } from 'react';
-import { View, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Pressable, Alert } from 'react-native';
+import Screen from '@/components/layout/Screen';
 import { Text, Spinner } from '@sudobility/components-rn';
-import { useTabBarHeight } from '@/hooks/useTabBarHeight';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import { useAuth } from '@/context/AuthContext';
@@ -65,8 +64,6 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { user, isLoading: authLoading, signOut } = useAuth();
   const { theme, setTheme, agentMode } = useSettingsStore();
   const { effective } = useLlmKeys();
-
-  const tabBarHeight = useTabBarHeight();
 
   useEffect(() => {
     trackScreenView('Settings');
@@ -139,187 +136,175 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const currentTheme = themes.find(th => th.value === theme)?.label ?? 'System';
 
   return (
-    <SafeAreaView className='flex-1 bg-background' edges={['left', 'right']}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: tabBarHeight + 16 },
-        ]}
-      >
-        {/* Agent Section */}
-        <View className='mb-7'>
-          <Text
-            size='sm'
-            weight='semibold'
-            color='muted'
-            transform='uppercase'
-            className='mb-2 px-1 tracking-wide'
+    <Screen title={t('settings.title')} hideBack>
+      {/* Agent Section */}
+      <View className='mb-7'>
+        <Text
+          size='sm'
+          weight='semibold'
+          color='muted'
+          transform='uppercase'
+          className='mb-2 px-1 tracking-wide'
+        >
+          {t('settings.agent')}
+        </Text>
+        <View className='rounded-lg overflow-hidden bg-card'>
+          <Pressable
+            className='flex-row justify-between items-center py-3 px-4'
+            onPress={() => {
+              trackButtonClick('api_keys');
+              navigation.navigate('ApiKeys');
+            }}
+            accessibilityRole='button'
+            accessibilityLabel={`${t('settings.apiKeys')}: ${agentModeLabel}`}
+            testID='settings-api-keys'
           >
-            {t('settings.agent')}
-          </Text>
-          <View className='rounded-lg overflow-hidden bg-card'>
+            <View className='flex-1 mr-3'>
+              <Text size='base'>{t('settings.apiKeys')}</Text>
+              <Text size='sm' color='muted' className='mt-0.5'>
+                {t('settings.apiKeysDescription')}
+              </Text>
+            </View>
+            <Text size='base' color='muted'>
+              {agentModeLabel}
+            </Text>
+            <Text size='xl' color='muted' className='ml-2'>
+              {'›'}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Appearance Section */}
+      <View className='mb-7'>
+        <Text
+          size='sm'
+          weight='semibold'
+          color='muted'
+          transform='uppercase'
+          className='mb-2 px-1 tracking-wide'
+        >
+          {t('settings.appearance')}
+        </Text>
+        <View className='rounded-lg overflow-hidden bg-card'>
+          <Pressable
+            className='flex-row justify-between items-center py-3 px-4'
+            onPress={handleThemeChange}
+            accessibilityRole='button'
+            accessibilityLabel={`${t('settings.theme.label')}: ${t(
+              `settings.theme.${theme}`,
+              currentTheme
+            )}`}
+          >
+            <View className='flex-1 mr-3'>
+              <Text size='base'>{t('settings.theme.label')}</Text>
+              <Text size='sm' color='muted' className='mt-0.5'>
+                {t('settings.themeDescription')}
+              </Text>
+            </View>
+            <Text size='base' color='muted'>
+              {t(`settings.theme.${theme}`, currentTheme)}
+            </Text>
+          </Pressable>
+          <RowSeparator />
+          <Pressable
+            className='flex-row justify-between items-center py-3 px-4'
+            onPress={handleLanguageChange}
+            accessibilityRole='button'
+            accessibilityLabel={`${t('settings.language')}: ${
+              LANGUAGE_LABELS[i18n.language] ?? i18n.language
+            }`}
+          >
+            <View className='flex-1 mr-3'>
+              <Text size='base'>{t('settings.language')}</Text>
+              <Text size='sm' color='muted' className='mt-0.5'>
+                {t('settings.languageDescription')}
+              </Text>
+            </View>
+            <Text size='base' color='muted'>
+              {LANGUAGE_LABELS[i18n.language] ?? i18n.language}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Account Section */}
+      <View className='mb-7'>
+        <Text
+          size='sm'
+          weight='semibold'
+          color='muted'
+          transform='uppercase'
+          className='mb-2 px-1 tracking-wide'
+        >
+          {t('settings.account')}
+        </Text>
+        <View className='rounded-lg overflow-hidden bg-card'>
+          {authLoading ? (
+            <View className='flex-row justify-between items-center py-3 px-4'>
+              <Spinner size='small' />
+            </View>
+          ) : user ? (
+            <View className='flex-row justify-between items-center py-3 px-4'>
+              <View className='flex-1 mr-3'>
+                <Text size='base'>{user.email || t('auth.signedIn')}</Text>
+                <Text size='sm' color='muted' className='mt-0.5'>
+                  {user.displayName || user.uid.substring(0, 8)}
+                </Text>
+              </View>
+              <Pressable
+                onPress={handleSignOut}
+                accessibilityRole='button'
+                accessibilityLabel={t('auth.signOut')}
+              >
+                <Text size='base' color='primary'>
+                  {t('auth.signOut')}
+                </Text>
+              </Pressable>
+            </View>
+          ) : (
             <Pressable
               className='flex-row justify-between items-center py-3 px-4'
               onPress={() => {
-                trackButtonClick('api_keys');
-                navigation.navigate('ApiKeys');
+                trackButtonClick('sign_in');
+                setShowSignIn(true);
               }}
               accessibilityRole='button'
-              accessibilityLabel={`${t('settings.apiKeys')}: ${agentModeLabel}`}
-              testID='settings-api-keys'
+              accessibilityLabel={t('auth.signIn')}
             >
               <View className='flex-1 mr-3'>
-                <Text size='base'>{t('settings.apiKeys')}</Text>
+                <Text size='base'>{t('auth.signIn')}</Text>
                 <Text size='sm' color='muted' className='mt-0.5'>
-                  {t('settings.apiKeysDescription')}
+                  {t('settings.signInDescription')}
                 </Text>
               </View>
-              <Text size='base' color='muted'>
-                {agentModeLabel}
-              </Text>
-              <Text size='xl' color='muted' className='ml-2'>
+              <Text size='xl' color='muted'>
                 {'›'}
               </Text>
             </Pressable>
-          </View>
+          )}
         </View>
+      </View>
 
-        {/* Appearance Section */}
-        <View className='mb-7'>
-          <Text
-            size='sm'
-            weight='semibold'
-            color='muted'
-            transform='uppercase'
-            className='mb-2 px-1 tracking-wide'
-          >
-            {t('settings.appearance')}
-          </Text>
-          <View className='rounded-lg overflow-hidden bg-card'>
-            <Pressable
-              className='flex-row justify-between items-center py-3 px-4'
-              onPress={handleThemeChange}
-              accessibilityRole='button'
-              accessibilityLabel={`${t('settings.theme.label')}: ${t(
-                `settings.theme.${theme}`,
-                currentTheme
-              )}`}
-            >
-              <View className='flex-1 mr-3'>
-                <Text size='base'>{t('settings.theme.label')}</Text>
-                <Text size='sm' color='muted' className='mt-0.5'>
-                  {t('settings.themeDescription')}
-                </Text>
-              </View>
-              <Text size='base' color='muted'>
-                {t(`settings.theme.${theme}`, currentTheme)}
-              </Text>
-            </Pressable>
-            <RowSeparator />
-            <Pressable
-              className='flex-row justify-between items-center py-3 px-4'
-              onPress={handleLanguageChange}
-              accessibilityRole='button'
-              accessibilityLabel={`${t('settings.language')}: ${
-                LANGUAGE_LABELS[i18n.language] ?? i18n.language
-              }`}
-            >
-              <View className='flex-1 mr-3'>
-                <Text size='base'>{t('settings.language')}</Text>
-                <Text size='sm' color='muted' className='mt-0.5'>
-                  {t('settings.languageDescription')}
-                </Text>
-              </View>
-              <Text size='base' color='muted'>
-                {LANGUAGE_LABELS[i18n.language] ?? i18n.language}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* Account Section */}
-        <View className='mb-7'>
-          <Text
-            size='sm'
-            weight='semibold'
-            color='muted'
-            transform='uppercase'
-            className='mb-2 px-1 tracking-wide'
-          >
-            {t('settings.account')}
-          </Text>
-          <View className='rounded-lg overflow-hidden bg-card'>
-            {authLoading ? (
-              <View className='flex-row justify-between items-center py-3 px-4'>
-                <Spinner size='small' />
-              </View>
-            ) : user ? (
-              <View className='flex-row justify-between items-center py-3 px-4'>
-                <View className='flex-1 mr-3'>
-                  <Text size='base'>{user.email || t('auth.signedIn')}</Text>
-                  <Text size='sm' color='muted' className='mt-0.5'>
-                    {user.displayName || user.uid.substring(0, 8)}
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={handleSignOut}
-                  accessibilityRole='button'
-                  accessibilityLabel={t('auth.signOut')}
-                >
-                  <Text size='base' color='primary'>
-                    {t('auth.signOut')}
-                  </Text>
-                </Pressable>
-              </View>
-            ) : (
-              <Pressable
-                className='flex-row justify-between items-center py-3 px-4'
-                onPress={() => {
-                  trackButtonClick('sign_in');
-                  setShowSignIn(true);
-                }}
-                accessibilityRole='button'
-                accessibilityLabel={t('auth.signIn')}
-              >
-                <View className='flex-1 mr-3'>
-                  <Text size='base'>{t('auth.signIn')}</Text>
-                  <Text size='sm' color='muted' className='mt-0.5'>
-                    {t('settings.signInDescription')}
-                  </Text>
-                </View>
-                <Text size='xl' color='muted'>
-                  {'›'}
-                </Text>
-              </Pressable>
-            )}
-          </View>
-        </View>
-
-        {/* About Section */}
-        <View className='mb-7'>
-          <Text
-            size='sm'
-            weight='semibold'
-            color='muted'
-            transform='uppercase'
-            className='mb-2 px-1 tracking-wide'
-          >
-            {t('settings.about')}
-          </Text>
-          <Text size='sm' color='muted' className='px-1'>
-            {t('settings.version')}
-          </Text>
-          <Text size='xs' color='muted' className='mt-1 px-1'>
-            {t('settings.copyright', { companyName: COMPANY_NAME })}
-          </Text>
-        </View>
-      </ScrollView>
-
+      {/* About Section */}
+      <View className='mb-7'>
+        <Text
+          size='sm'
+          weight='semibold'
+          color='muted'
+          transform='uppercase'
+          className='mb-2 px-1 tracking-wide'
+        >
+          {t('settings.about')}
+        </Text>
+        <Text size='sm' color='muted' className='px-1'>
+          {t('settings.version')}
+        </Text>
+        <Text size='xs' color='muted' className='mt-1 px-1'>
+          {t('settings.copyright', { companyName: COMPANY_NAME })}
+        </Text>
+      </View>
       <SignInModal visible={showSignIn} onClose={() => setShowSignIn(false)} />
-    </SafeAreaView>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: { padding: 16 },
-});

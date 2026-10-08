@@ -80,14 +80,20 @@ export function canAddMore(
   return isSingleSelection(mode) || selected.size < MAX_SELECTED_SITES;
 }
 
-/** The selection the Sites step opens with: the top-ranked site for `single`, none otherwise. */
+/** How many top-ranked sites `best` / `all` start with ticked. */
+export const PRESELECTED_SITES = 3;
+
+/**
+ * The selection the Sites step opens with: the top-ranked site for `single`,
+ * the top {@link PRESELECTED_SITES} for `best` / `all` (candidates arrive
+ * ranked best-first, so Next works without touching the list).
+ */
 export function initialSelection(
   mode: SelectionMode,
   candidates: CandidateSite[]
 ): Set<string> {
-  return isSingleSelection(mode) && candidates[0]
-    ? new Set([candidates[0].apiHost])
-    : new Set();
+  const count = isSingleSelection(mode) ? 1 : PRESELECTED_SITES;
+  return new Set(candidates.slice(0, count).map(c => c.apiHost));
 }
 
 /** "Next" is enabled for exactly one site (`single`) or 1–8 sites (`best`/`all`). */
@@ -106,4 +112,21 @@ export function selectedInOrder(
   selected: ReadonlySet<string>
 ): CandidateSite[] {
   return candidates.filter(c => selected.has(c.apiHost));
+}
+
+/**
+ * The domain a site is known by: its first site origin's host, else the API
+ * host, without `www.` (`https://www.humanitix.com` → `humanitix.com`).
+ */
+export function siteDomain(
+  site: Pick<CandidateSite, 'apiHost' | 'siteOrigins'>
+): string {
+  for (const origin of site.siteOrigins) {
+    try {
+      return new URL(origin).hostname.replace(/^www\./, '');
+    } catch {
+      // Not a URL; try the next one.
+    }
+  }
+  return site.apiHost.replace(/:\d+$/, '').replace(/^www\./, '');
 }

@@ -69,3 +69,10 @@ jest.mock(
   }),
   { virtual: true }
 );
+
+// Safe-area insets for components outside a SafeAreaProvider (every screen's
+// NavBar reads the top inset): the library's own Jest mock.
+jest.mock(
+  'react-native-safe-area-context',
+  () => require('react-native-safe-area-context/jest/mock').default
+);

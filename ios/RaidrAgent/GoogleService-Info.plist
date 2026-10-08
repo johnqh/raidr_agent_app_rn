@@ -1,29 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!--
-  PLACEHOLDER. Replace this whole file with the GoogleService-Info.plist that the
-  Firebase console generates for the iOS app com.sudobility.raidragent, then copy
-  its REVERSED_CLIENT_ID into the URL scheme in ios/RaidrAgent/Info.plist and
-  macos/RaidrAgent-macOS/Info.plist.
--->
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>REPLACE_WITH_IOS_CLIENT_ID.apps.googleusercontent.com</string>
+	<string>999780308719-loeaq0oo8crrjq1vb5hab4k55th3lifb.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.REPLACE_WITH_IOS_CLIENT_ID</string>
+	<string>com.googleusercontent.apps.999780308719-loeaq0oo8crrjq1vb5hab4k55th3lifb</string>
 	<key>API_KEY</key>
-	<string>REPLACE_WITH_FIREBASE_IOS_API_KEY</string>
+	<string>AIzaSyCjcIBcmqHivMPbFMRiI5-soboH3JPSa9Y</string>
 	<key>GCM_SENDER_ID</key>
-	<string>000000000000</string>
+	<string>999780308719</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.sudobility.raidragent</string>
+	<string>com.sudobility.raidr.agent</string>
 	<key>PROJECT_ID</key>
-	<string>replace-with-firebase-project-id</string>
+	<string>raidr-agent</string>
 	<key>STORAGE_BUCKET</key>
-	<string>replace-with-firebase-project-id.firebasestorage.app</string>
+	<string>raidr-agent.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
 	<false></false>
 	<key>IS_APPINVITE_ENABLED</key>
@@ -33,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:000000000000:ios:0000000000000000000000</string>
+	<string>1:999780308719:ios:7068de0375eda2e017ed1a</string>
 </dict>
 </plist>

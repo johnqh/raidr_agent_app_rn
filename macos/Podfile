@@ -79,6 +79,12 @@ target 'RaidrAgent-macOS' do
   post_install do |installer|
     react_native_post_install(installer)
 
+    # The provider is compiled by the Pods `ReactCodegen` target, which builds
+    # before the app target's patch phase below. `pod install` regenerates it,
+    # so patch it here too, or the first build after an install compiles the
+    # unpatched file and crashes at launch on a component macOS lacks.
+    system({ 'PODS_ROOT' => installer.sandbox.root.to_s }, '/bin/sh', '-c', NIL_SAFE_PATCH_SCRIPT)
+
     # Add a "Patch Nil-Safe Components" script phase to the main app target
     # so it runs every build AFTER codegen but BEFORE compile sources.
     project_path = File.join(__dir__, 'RaidrAgent.xcodeproj')
@@ -99,6 +105,12 @@ target 'RaidrAgent-macOS' do
     # artifacts do this job; a compiler wrapper on every invocation does not.
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |bc|
+        # Pod targets keep their podspec's minimum (some as old as 10.13), and
+        # Xcode 27 rejects anything below 12.0. Lift them to the app's target.
+        deployment_target = bc.build_settings['MACOSX_DEPLOYMENT_TARGET']
+        if deployment_target && Gem::Version.new(deployment_target) < Gem::Version.new('14.0')
+          bc.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '14.0'
+        end
         # The index store feeds Xcode's editor; a CLI build discards it.
         bc.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
         next unless bc.name == 'Debug'

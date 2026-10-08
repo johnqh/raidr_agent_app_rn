@@ -9,30 +9,37 @@
  *
  * How answers show follows the intent's selection mode:
  * - `single` / `best`: the one best result in full, with why it was picked,
- *   and "See all N results" to switch to the list;
- * - `all`: the list (with a map for location requests) → Result detail.
+ *   and "See all N results", which opens All results (its own screen);
+ * - `all`: the list (with a map for location requests) → Result detail. After
+ *   every site finished, `data-groups` merges duplicates into one row showing
+ *   each site's icon; such a row opens Result sources (pick a site) first.
  *
  * A `fallback` site whose calls all failed with 401/403 gets "Sign in to
  * <site> and retry": the Login web view, then a re-run of that site alone
  * (its earlier results and calls are replaced).
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Text, Badge, Button, Spinner } from '@sudobility/components-rn';
 import { useTranslation } from 'react-i18next';
 import type {
   BestData,
   CallData,
+  ResultGroup,
   ResultItem,
   SitePlan,
   SiteStatusData,
 } from '@sudobility/raidr_agent_types';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@sudobility/raidr_agent_client';
-import { useTabBarHeight } from '@/hooks/useTabBarHeight';
 import { useAgentClient } from '@/hooks/useAgentClient';
 import { useAuth } from '@/context/AuthContext';
 import { useRunFlowStore } from '@/stores/runFlowStore';
@@ -45,7 +52,11 @@ import {
   supportedSites,
 } from '@/lib/prepare';
 import { bestResult, replaceSiteResults, showsBest } from '@/lib/results';
-import ResultCard from '@/components/ResultCard';
+import { useSiteBadges } from '@/hooks/useSiteBadges';
+import ResultList from '@/components/ResultList';
+import Screen, { READABLE_WIDTH } from '@/components/layout/Screen';
+import TileGrid from '@/components/layout/TileGrid';
+import SiteIcon from '@/components/SiteIcon';
 import ResultsMap from '@/components/ResultsMap';
 import BestResult from '@/components/BestResult';
 import { trackScreenView, trackButtonClick, trackEvent } from '@/analytics';
@@ -53,7 +64,6 @@ import type { ResultsScreenProps } from '@/navigation/types';
 
 export default function ResultsScreen({ navigation }: ResultsScreenProps) {
   const { t } = useTranslation();
-  const tabBarHeight = useTabBarHeight();
 
   const request = useRunFlowStore(s => s.request);
   const intent = useRunFlowStore(s => s.intent);
@@ -69,11 +79,11 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
   const [calls, setCalls] = useState<Record<string, CallData>>({});
   const [results, setResults] = useState<ResultItem[]>([]);
   const [best, setBest] = useState<BestData | null>(null);
+  const [groups, setGroups] = useState<ResultGroup[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [activeRuns, setActiveRuns] = useState(0);
   const [started, setStarted] = useState(false);
   const [view, setView] = useState<'list' | 'map'>('list');
-  const [showAll, setShowAll] = useState(false);
 
   const cancelledRef = useRef(false);
   const handlesRef = useRef<RunHandle[]>([]);
@@ -120,6 +130,8 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
           }
           return next;
         });
+        // The retried site's results are new; its old merges no longer hold.
+        setGroups([]);
         setError(null);
       }
 
@@ -158,6 +170,9 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
             case 'best':
               // A one-site retry's pick does not override the run's.
               setBest(prev => (retry && prev ? prev : part.data));
+              break;
+            case 'groups':
+              setGroups(part.data.groups);
               break;
             case 'run':
               break;
@@ -271,119 +286,77 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
     ? []
     : sitesToRetryWithSignIn(sites, Object.values(calls));
   const top =
-    showsBest(mode) && !showAll && (!running || best)
-      ? bestResult(results, best)
-      : null;
-
-  const renderList = () => (
-    <>
-      <View className='flex-row items-center justify-between mb-2 px-1'>
-        <Text size='sm' weight='semibold' color='muted' transform='uppercase'>
-          {t('results.answers')}
-        </Text>
-        <View className='flex-row'>
-          {showsBest(mode) ? (
-            <Button
-              variant='ghost'
-              size='sm'
-              onPress={() => setShowAll(false)}
-              accessibilityLabel={t('results.showBest')}
-            >
-              {t('results.showBest')}
-            </Button>
-          ) : null}
-          {locationNeeded ? (
-            <>
-              <Button
-                variant={view === 'list' ? 'primary' : 'outline'}
-                size='sm'
-                onPress={() => setView('list')}
-              >
-                {t('results.list')}
-              </Button>
-              <Button
-                variant={view === 'map' ? 'primary' : 'outline'}
-                size='sm'
-                onPress={() => setView('map')}
-              >
-                {t('results.map')}
-              </Button>
-            </>
-          ) : null}
-        </View>
-      </View>
-      {view === 'map' && locationNeeded ? (
-        <>
-          <ResultsMap
-            items={results}
-            userLocation={location}
-            onSelect={item => navigation.navigate('ResultDetail', { item })}
-          />
-          {!results.some(item => item.location != null) ? (
-            <Text size='sm' color='muted' className='mt-2'>
-              {t('results.noMapResults')}
-            </Text>
-          ) : null}
-        </>
-      ) : (
-        results.map(item => (
-          <ResultCard
-            key={item.id}
-            item={item}
-            onPress={() =>
-              navigation.navigate('ResultDetail', {
-                item,
-                ...(best?.resultId === item.id ? { reason: best.reason } : {}),
-              })
-            }
-          />
-        ))
-      )}
-    </>
+    showsBest(mode) && (!running || best) ? bestResult(results, best) : null;
+  // The run's sites, for their domain and icon in the progress tiles.
+  const siteHosts = useMemo(
+    () => sites.map(s => s.apiHost),
+    // `sites` is derived from `plan` each render; key on the plan.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [plan]
   );
+  const badges = useSiteBadges(siteHosts);
+
+  const seeAll = () => {
+    trackButtonClick('results_see_all', { count: results.length });
+    navigation.navigate('AllResults', { results, groups, best });
+  };
 
   return (
-    <SafeAreaView className='flex-1 bg-background' edges={['left', 'right']}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: tabBarHeight + 16 },
-        ]}
+    <Screen
+      title={t('results.title')}
+      layout='list'
+      headerRight={
+        locationNeeded && !showsBest(mode) && results.length > 0 ? (
+          <Button
+            variant='ghost'
+            size='sm'
+            onPress={() => setView(view === 'list' ? 'map' : 'list')}
+            accessibilityLabel={t(
+              view === 'list' ? 'results.map' : 'results.list'
+            )}
+          >
+            {t(view === 'list' ? 'results.map' : 'results.list')}
+          </Button>
+        ) : undefined
+      }
+    >
+      {/* Progress */}
+      <Text
+        size='sm'
+        weight='semibold'
+        color='muted'
+        transform='uppercase'
+        className='mb-2 tracking-wide'
       >
-        {/* Progress */}
-        <Text
-          size='sm'
-          weight='semibold'
-          color='muted'
-          transform='uppercase'
-          className='mb-2 px-1 tracking-wide'
-        >
-          {t('results.progress')}
-        </Text>
-        <View className='rounded-lg overflow-hidden bg-card mb-6'>
-          {sites.map((site, index) => {
+        {t('results.progress')}
+      </Text>
+      <View className='mb-6'>
+        <TileGrid minTileWidth={260}>
+          {sites.map(site => {
             const status = statuses[site.apiHost];
             const statusKey = status?.status ?? 'queued';
             const count = callCountFor(site.apiHost);
             const canRetry = retryable.some(r => r.apiHost === site.apiHost);
+            const badge = badges[site.apiHost];
+            const name = badge?.domain ?? site.title;
             return (
               <View
                 key={site.apiHost}
-                className={`py-3 px-4 ${
-                  index > 0 ? 'border-t border-foreground/10' : ''
-                }`}
+                className='flex-1 p-4 rounded-lg bg-card border border-foreground/10'
               >
-                <View className='flex-row items-center justify-between'>
+                <View className='flex-row items-center'>
+                  <View className='mr-3'>
+                    <SiteIcon
+                      {...(badge?.iconUrl ? { iconUrl: badge.iconUrl } : {})}
+                      domain={name}
+                      size={28}
+                    />
+                  </View>
                   <View className='flex-1 mr-3'>
-                    <Text size='base'>{site.title}</Text>
+                    <Text size='base'>{name}</Text>
                     {count > 0 ? (
                       <Text size='xs' color='muted' className='mt-0.5'>
                         {t('results.calls', { count })}
-                      </Text>
-                    ) : null}
-                    {status?.message ? (
-                      <Text size='xs' color='muted' className='mt-0.5'>
-                        {status.message}
                       </Text>
                     ) : null}
                   </View>
@@ -400,6 +373,11 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
                     {t(`results.status.${statusKey}`, statusKey)}
                   </Badge>
                 </View>
+                {status?.message ? (
+                  <Text size='xs' color='muted' className='mt-2'>
+                    {status.message}
+                  </Text>
+                ) : null}
                 {canRetry ? (
                   <View className='mt-2'>
                     <Text size='xs' color='muted' className='mb-2'>
@@ -411,10 +389,10 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
                         size='sm'
                         onPress={() => retryWithSignIn(site)}
                         accessibilityLabel={t('results.signInRetry', {
-                          site: site.title,
+                          site: name,
                         })}
                       >
-                        {t('results.signInRetry', { site: site.title })}
+                        {t('results.signInRetry', { site: name })}
                       </Button>
                     </View>
                   </View>
@@ -422,49 +400,76 @@ export default function ResultsScreen({ navigation }: ResultsScreenProps) {
               </View>
             );
           })}
-        </View>
+        </TileGrid>
+      </View>
 
-        {/* Results */}
-        {top ? (
-          <BestResult
-            item={top.item}
-            reason={top.reason}
-            total={results.length}
-            onSeeAll={() => {
-              trackButtonClick('results_see_all', { count: results.length });
-              setShowAll(true);
-            }}
-          />
-        ) : results.length > 0 && (!showsBest(mode) || showAll) ? (
-          renderList()
-        ) : results.length > 0 ? (
-          <Text size='sm' color='muted' className='px-1'>
-            {t('results.soFar', { count: results.length })}
-          </Text>
-        ) : null}
-
-        {/* States */}
-        {error ? (
-          <Text size='sm' color='danger' className='mt-2 px-1'>
-            {error}
-          </Text>
-        ) : running ? (
-          <View className='flex-row items-center mt-2 px-1'>
-            <Spinner size='small' />
-            <Text size='sm' color='muted' className='ml-2'>
-              {t('results.running')}
-            </Text>
+      {/* Answers */}
+      {top ? (
+        <View className='items-center'>
+          <View style={styles.readable}>
+            <BestResult
+              item={top.item}
+              reason={top.reason}
+              total={results.length}
+              onSeeAll={seeAll}
+            />
           </View>
-        ) : results.length === 0 ? (
-          <Text size='sm' color='muted' className='mt-2 px-1'>
-            {t('results.empty')}
+        </View>
+      ) : results.length > 0 && !showsBest(mode) ? (
+        <>
+          <Text
+            size='sm'
+            weight='semibold'
+            color='muted'
+            transform='uppercase'
+            className='mb-2 tracking-wide'
+          >
+            {t('results.answers')}
           </Text>
-        ) : null}
-      </ScrollView>
-    </SafeAreaView>
+          {view === 'map' && locationNeeded ? (
+            <>
+              <ResultsMap
+                items={results}
+                userLocation={location}
+                onSelect={item => navigation.navigate('ResultDetail', { item })}
+              />
+              {!results.some(item => item.location != null) ? (
+                <Text size='sm' color='muted' className='mt-2'>
+                  {t('results.noMapResults')}
+                </Text>
+              ) : null}
+            </>
+          ) : (
+            <ResultList results={results} groups={groups} best={best} />
+          )}
+        </>
+      ) : results.length > 0 ? (
+        <Text size='sm' color='muted'>
+          {t('results.soFar', { count: results.length })}
+        </Text>
+      ) : null}
+
+      {/* States */}
+      {error ? (
+        <Text size='sm' color='danger' className='mt-2'>
+          {error}
+        </Text>
+      ) : running ? (
+        <View className='flex-row items-center mt-2'>
+          <Spinner size='small' />
+          <Text size='sm' color='muted' className='ml-2'>
+            {t('results.running')}
+          </Text>
+        </View>
+      ) : results.length === 0 ? (
+        <Text size='sm' color='muted' className='mt-2'>
+          {t('results.empty')}
+        </Text>
+      ) : null}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16 },
+  readable: { width: '100%', maxWidth: READABLE_WIDTH },
 });

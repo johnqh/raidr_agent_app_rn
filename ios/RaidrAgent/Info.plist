@@ -27,13 +27,13 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>com.sudobility.raidragent</string>
+          <string>com.sudobility.raidr.agent</string>
         </array>
       </dict>
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>com.googleusercontent.apps.REPLACE_WITH_IOS_CLIENT_ID</string>
+          <string>com.googleusercontent.apps.999780308719-loeaq0oo8crrjq1vb5hab4k55th3lifb</string>
         </array>
       </dict>
     </array>

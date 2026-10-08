@@ -13,6 +13,7 @@ import {
   MAX_SELECTED_SITES,
   nextSelection,
   selectedInOrder,
+  siteDomain,
 } from '../sites';
 
 function site(overrides: Partial<CandidateSite>): CandidateSite {
@@ -78,9 +79,11 @@ describe('isNextEnabled', () => {
 describe('initialSelection / selectedInOrder', () => {
   const candidates = [site({ apiHost: 'a' }), site({ apiHost: 'b' })];
 
-  it('preselects the top site only for single', () => {
-    expect([...initialSelection('single', candidates)]).toEqual(['a']);
-    expect(initialSelection('all', candidates).size).toBe(0);
+  it('preselects the top site for single and the top three otherwise', () => {
+    const many = ['a', 'b', 'c', 'd'].map(apiHost => site({ apiHost }));
+    expect([...initialSelection('single', many)]).toEqual(['a']);
+    expect([...initialSelection('all', many)]).toEqual(['a', 'b', 'c']);
+    expect([...initialSelection('best', candidates)]).toEqual(['a', 'b']);
     expect(initialSelection('single', []).size).toBe(0);
     expect(isSingleSelection('best')).toBe(false);
   });
@@ -89,5 +92,25 @@ describe('initialSelection / selectedInOrder', () => {
     expect(
       selectedInOrder(candidates, new Set(['b', 'a'])).map(s => s.apiHost)
     ).toEqual(['a', 'b']);
+  });
+});
+
+describe('siteDomain', () => {
+  it('uses the first site origin without www, else the API host', () => {
+    expect(
+      siteDomain({
+        apiHost: 'api.humanitix.com',
+        siteOrigins: [
+          'https://www.humanitix.com',
+          'https://events.humanitix.com',
+        ],
+      })
+    ).toBe('humanitix.com');
+    expect(siteDomain({ apiHost: 'www.vividseats.com', siteOrigins: [] })).toBe(
+      'vividseats.com'
+    );
+    expect(
+      siteDomain({ apiHost: 'localhost:8080', siteOrigins: ['nope'] })
+    ).toBe('localhost');
   });
 });

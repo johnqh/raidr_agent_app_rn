@@ -42,6 +42,8 @@ interface RunFlowState {
     candidates: CandidateSite[],
     location: Coordinates | null
   ) => void;
+  /** Record the device position (the location permission screen). */
+  setLocation: (location: Coordinates | null) => void;
   /** Record the Prepare step's plan (clears earlier inputs). */
   setPlan: (plan: PrepareResponse | null) => void;
   /** Record the form answers for the run. */
@@ -64,6 +66,7 @@ export const useRunFlowStore = create<RunFlowState>(set => ({
   ...initialState,
   setFlow: (request, intent, candidates, location) =>
     set({ request, intent, candidates, location, plan: null, inputs: {} }),
+  setLocation: location => set({ location }),
   setPlan: plan => set({ plan, inputs: {} }),
   setInputs: inputs => set({ inputs }),
   clear: () => set(initialState),

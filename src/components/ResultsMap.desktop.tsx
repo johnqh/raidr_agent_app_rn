@@ -43,10 +43,7 @@ const htmlForResults = (items: LocatedResult[]) => {
 };
 
 export default function ResultsMap({ items, onSelect }: Props) {
-  const html = useMemo(
-    () => htmlForResults(items as LocatedResult[]),
-    [items]
-  );
+  const html = useMemo(() => htmlForResults(items as LocatedResult[]), [items]);
   const byId = useMemo(
     () => new Map(items.map(item => [item.id, item])),
     [items]

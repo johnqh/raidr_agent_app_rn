@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Pressable } from 'react-native';
 import { Text } from '@sudobility/components-rn';
+import { useAppColors } from '@/hooks/useAppColors';
 import { useTranslation } from 'react-i18next';
 import {
   ChatBubbleLeftRightIcon,
@@ -29,25 +30,27 @@ const tabs: { key: SidebarTab; labelKey: string }[] = [
 ];
 
 function TabIcon({ tab, focused }: { tab: SidebarTab; focused: boolean }) {
-  const className = focused ? 'text-primary' : 'text-muted-foreground';
+  // A colour, not a className: on macOS a className leaves the icon unpainted.
+  const colors = useAppColors();
+  const color = focused ? colors.primary : colors.textMuted;
   switch (tab) {
     case 'AskTab':
       return focused ? (
-        <ChatBubbleLeftRightIconSolid className={className} size={ICON_SIZE} />
+        <ChatBubbleLeftRightIconSolid color={color} size={ICON_SIZE} />
       ) : (
-        <ChatBubbleLeftRightIcon className={className} size={ICON_SIZE} />
+        <ChatBubbleLeftRightIcon color={color} size={ICON_SIZE} />
       );
     case 'HistoryTab':
       return focused ? (
-        <ClockIconSolid className={className} size={ICON_SIZE} />
+        <ClockIconSolid color={color} size={ICON_SIZE} />
       ) : (
-        <ClockIcon className={className} size={ICON_SIZE} />
+        <ClockIcon color={color} size={ICON_SIZE} />
       );
     case 'SettingsTab':
       return focused ? (
-        <Cog6ToothIconSolid className={className} size={ICON_SIZE} />
+        <Cog6ToothIconSolid color={color} size={ICON_SIZE} />
       ) : (
-        <Cog6ToothIcon className={className} size={ICON_SIZE} />
+        <Cog6ToothIcon color={color} size={ICON_SIZE} />
       );
   }
 }

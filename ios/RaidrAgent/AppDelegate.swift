@@ -94,8 +94,8 @@ class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
 
   override func bundleURL() -> URL? {
 #if DEBUG
-    // Use port 8090 to avoid conflicts with other React Native apps
-    RCTBundleURLProvider.sharedSettings().jsLocation = "localhost:8090"
+    // Use port 8094 to avoid conflicts with other React Native apps
+    RCTBundleURLProvider.sharedSettings().jsLocation = "localhost:8094"
     return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
 #else
     return Bundle.main.url(forResource: "main", withExtension: "jsbundle")

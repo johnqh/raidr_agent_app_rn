@@ -225,12 +225,24 @@ export async function understandLocally(
   if (candidates.length === 0) {
     return { intent, candidates };
   }
-  const ranked = await rankSites(ai, {
-    request: body.request,
-    intent,
-    ...(body.country ? { country: body.country } : {}),
-    candidates,
-  });
+  // Ranking looks at each candidate's tools; the bare manifest is enough.
+  const manifests: SiteCatalog = {
+    manifest: async apiHost =>
+      unwrap(
+        await client.getSiteManifest(apiHost, (await getToken()) ?? ''),
+        `Loading ${apiHost}`
+      ),
+  };
+  const ranked = await rankSites(
+    ai,
+    {
+      request: body.request,
+      intent,
+      ...(body.country ? { country: body.country } : {}),
+      candidates,
+    },
+    manifests
+  );
   return { intent, candidates: ranked };
 }
 
@@ -322,6 +334,9 @@ export function startLocalRun(
             case 'data-best':
               best = part.data;
               emit({ type: 'best', data: part.data });
+              break;
+            case 'data-groups':
+              emit({ type: 'groups', data: part.data });
               break;
           }
         },

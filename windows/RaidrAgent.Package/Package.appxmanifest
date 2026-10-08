@@ -7,7 +7,7 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="com.sudobility.raidragent"
+    Name="com.sudobility.raidr.agent"
     Publisher="CN=johnhuang"
     Version="0.0.1.0" />
 

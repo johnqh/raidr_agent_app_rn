@@ -7,9 +7,9 @@
  */
 
 import React, { useEffect } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import type { RouteProp } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import Screen from '@/components/layout/Screen';
 import ResultDetailView from '@/components/ResultDetailView';
 import { trackScreenView } from '@/analytics';
 import type { ResultDetailParams } from '@/navigation/types';
@@ -20,20 +20,15 @@ interface ResultDetailScreenProps {
 
 export default function ResultDetailScreen({ route }: ResultDetailScreenProps) {
   const { item, reason } = route.params;
+  const { t } = useTranslation();
 
   useEffect(() => {
     trackScreenView('ResultDetail');
   }, []);
 
   return (
-    <SafeAreaView className='flex-1 bg-background' edges={['left', 'right']}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <ResultDetailView item={item} reason={reason} />
-      </ScrollView>
-    </SafeAreaView>
+    <Screen title={t('resultDetail.title')}>
+      <ResultDetailView item={item} reason={reason} />
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: { padding: 16, width: '100%', maxWidth: 720, alignSelf: 'center' },
-});

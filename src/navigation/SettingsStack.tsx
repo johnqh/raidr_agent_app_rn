@@ -11,9 +11,9 @@ export function SettingsStack() {
   const { t } = useTranslation();
   return (
     <Stack.Navigator
-      screenOptions={{
-        headerShown: true,
-      }}
+      // Every screen draws its own iOS-style NavBar (src/components/layout):
+      // native headers do not render on macOS / Windows.
+      screenOptions={{ headerShown: false }}
     >
       <Stack.Screen
         name='Settings'

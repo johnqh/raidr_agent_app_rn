@@ -2,7 +2,10 @@
  * Sites screen — pick which sites the run should call.
  *
  * Candidates arrive ranked best-first, each with the reason it was suggested,
- * grouped under their first label. The intent's selection mode decides the
+ * grouped under their first label. Each row shows the site's icon and its
+ * domain (not the catalog's API title). Each label's sites are tiles: one
+ * column when the window is narrow, a grid when wide; Next stays in a fixed
+ * footer. The intent's selection mode decides the
  * control: `single` is a radio list (exactly one site; the top one starts
  * chosen), `best` / `all` are checkboxes (1–8 sites). Signing in is decided
  * in the next step: "Next" goes to Prepare, which works out which chosen
@@ -10,13 +13,13 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { View, ScrollView, Pressable, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Pressable } from 'react-native';
 import { Text, Button, Checkbox } from '@sudobility/components-rn';
 import { useTranslation } from 'react-i18next';
 import { useSelectionStore } from '@sudobility/raidr_agent_lib';
 import type { CandidateSite } from '@sudobility/raidr_agent_types';
-import { useTabBarHeight } from '@/hooks/useTabBarHeight';
+import Screen from '@/components/layout/Screen';
+import TileGrid from '@/components/layout/TileGrid';
 import { useRunFlowStore } from '@/stores/runFlowStore';
 import {
   canAddMore,
@@ -25,7 +28,9 @@ import {
   isSingleSelection,
   MAX_SELECTED_SITES,
   nextSelection,
+  siteDomain,
 } from '@/lib/sites';
+import SiteIcon from '@/components/SiteIcon';
 import { trackScreenView, trackButtonClick } from '@/analytics';
 import type { SitesScreenProps } from '@/navigation/types';
 
@@ -44,7 +49,6 @@ function RadioMark({ checked }: { checked: boolean }) {
 
 export default function SitesScreen({ navigation }: SitesScreenProps) {
   const { t } = useTranslation();
-  const tabBarHeight = useTabBarHeight();
 
   const candidates = useRunFlowStore(s => s.candidates);
   const mode = useRunFlowStore(s => s.intent?.selection ?? 'all');
@@ -86,6 +90,7 @@ export default function SitesScreen({ navigation }: SitesScreenProps) {
   const renderRow = (site: CandidateSite) => {
     const checked = selected.has(site.apiHost);
     const disabled = !checked && !roomForMore;
+    const domain = siteDomain(site);
     return (
       <Pressable
         key={site.apiHost}
@@ -93,14 +98,20 @@ export default function SitesScreen({ navigation }: SitesScreenProps) {
         disabled={disabled}
         accessibilityRole={single ? 'radio' : 'checkbox'}
         accessibilityState={{ checked, disabled }}
-        accessibilityLabel={site.title}
-        className={`flex-row items-center py-3 px-4 border-t border-foreground/10 ${
-          disabled ? 'opacity-50' : ''
-        }`}
+        accessibilityLabel={domain}
+        className={`flex-1 flex-row items-start p-4 rounded-lg bg-card border ${
+          checked ? 'border-primary' : 'border-foreground/10'
+        } ${disabled ? 'opacity-50' : ''}`}
       >
+        <View className='mr-3'>
+          <SiteIcon
+            {...(site.iconUrl ? { iconUrl: site.iconUrl } : {})}
+            domain={domain}
+          />
+        </View>
         <View className='flex-1 mr-3'>
           <Text size='base' weight='semibold'>
-            {site.title}
+            {domain}
           </Text>
           {site.reason ? (
             <Text size='sm' className='mt-0.5'>
@@ -123,7 +134,7 @@ export default function SitesScreen({ navigation }: SitesScreenProps) {
             checked={checked}
             disabled={disabled}
             onChange={() => choose(site.apiHost)}
-            accessibilityLabel={site.title}
+            accessibilityLabel={domain}
           />
         )}
       </Pressable>
@@ -131,49 +142,10 @@ export default function SitesScreen({ navigation }: SitesScreenProps) {
   };
 
   return (
-    <SafeAreaView className='flex-1 bg-background' edges={['left', 'right']}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: tabBarHeight + 96 },
-        ]}
-      >
-        {candidates.length === 0 ? (
-          <View className='px-4 py-8'>
-            <Text size='base' color='muted'>
-              {t('sites.empty')}
-            </Text>
-          </View>
-        ) : (
-          <>
-            <Text size='sm' color='muted' className='mb-4 px-4'>
-              {single
-                ? t('sites.pickOne')
-                : t('sites.pickMany', { max: MAX_SELECTED_SITES })}
-            </Text>
-            {groups.map(group => (
-              <View key={group.label || 'other'} className='mb-6'>
-                <Text
-                  size='sm'
-                  weight='semibold'
-                  color='muted'
-                  transform='uppercase'
-                  className='mb-2 px-4 tracking-wide'
-                >
-                  {group.label || t('sites.otherLabel')}
-                </Text>
-                <View className='rounded-lg overflow-hidden bg-card [&>*:first-child]:border-t-0'>
-                  {group.sites.map(renderRow)}
-                </View>
-              </View>
-            ))}
-          </>
-        )}
-      </ScrollView>
-      <View
-        className='absolute left-0 right-0 bottom-0 px-4 pt-3 bg-background border-t border-foreground/10'
-        style={{ paddingBottom: tabBarHeight + 12 }}
-      >
+    <Screen
+      title={t('sites.title')}
+      layout='list'
+      footer={
         <Button
           variant='primary'
           disabled={!nextEnabled}
@@ -183,11 +155,35 @@ export default function SitesScreen({ navigation }: SitesScreenProps) {
         >
           {t('sites.next')}
         </Button>
-      </View>
-    </SafeAreaView>
+      }
+    >
+      {candidates.length === 0 ? (
+        <Text size='base' color='muted' className='py-8 text-center'>
+          {t('sites.empty')}
+        </Text>
+      ) : (
+        <>
+          <Text size='sm' color='muted' className='mb-4'>
+            {single
+              ? t('sites.pickOne')
+              : t('sites.pickMany', { max: MAX_SELECTED_SITES })}
+          </Text>
+          {groups.map(group => (
+            <View key={group.label || 'other'} className='mb-6'>
+              <Text
+                size='sm'
+                weight='semibold'
+                color='muted'
+                transform='uppercase'
+                className='mb-2 tracking-wide'
+              >
+                {group.label || t('sites.otherLabel')}
+              </Text>
+              <TileGrid>{group.sites.map(renderRow)}</TileGrid>
+            </View>
+          ))}
+        </>
+      )}
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: { paddingTop: 16 },
-});

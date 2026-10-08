@@ -35,7 +35,7 @@
 - (NSURL *)bundleURL
 {
 #if DEBUG
-  NSURL *url = [NSURL URLWithString:@"http://localhost:8090/index.bundle?platform=macos&dev=true&minify=false"];
+  NSURL *url = [NSURL URLWithString:@"http://localhost:8094/index.bundle?platform=macos&dev=true&minify=false"];
   NSLog(@"[RaidrAgent] bundleURL called, returning: %@", url);
   return url;
 #else

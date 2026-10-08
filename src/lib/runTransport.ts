@@ -11,7 +11,8 @@
  *
  * `DefaultChatTransport` + `useChat` are built around an assistant *message*
  * whose `parts` you re-render. This run carries only custom data parts
- * (`data-run`, `data-site-status`, `data-call`, `data-result`, `data-best`) and no assistant
+ * (`data-run`, `data-site-status`, `data-call`, `data-result`, `data-best`,
+ * `data-groups`) and no assistant
  * text, and the screen wants them as growing lists keyed by id — not as one
  * message to diff. Reading the stream directly is both simpler and fully typed
  * here: there is no `prepareSendMessagesRequest` generic to satisfy and no
@@ -33,6 +34,7 @@ import type {
 import type {
   BestData,
   CallData,
+  GroupsData,
   ResultItem,
   RunData,
   RunRequest,
@@ -45,7 +47,8 @@ export type RunStreamPart =
   | { type: 'site-status'; data: SiteStatusData }
   | { type: 'call'; data: CallData }
   | { type: 'result'; data: ResultItem }
-  | { type: 'best'; data: BestData };
+  | { type: 'best'; data: BestData }
+  | { type: 'groups'; data: GroupsData };
 
 /** Callbacks the run reader invokes as the stream progresses. */
 export interface RunCallbacks {
@@ -83,6 +86,8 @@ function toRunPart(chunk: RawChunk): RunStreamPart | null {
       return { type: 'result', data: chunk.data as ResultItem };
     case 'data-best':
       return { type: 'best', data: chunk.data as BestData };
+    case 'data-groups':
+      return { type: 'groups', data: chunk.data as GroupsData };
     default:
       return null;
   }

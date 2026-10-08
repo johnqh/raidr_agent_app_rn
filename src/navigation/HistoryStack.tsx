@@ -4,14 +4,20 @@ import { useTranslation } from 'react-i18next';
 import type { HistoryStackParamList } from './types';
 import HistoryScreen from '@/screens/HistoryScreen';
 import HistoryRunScreen from '@/screens/HistoryRunScreen';
+import AllResultsScreen from '@/screens/AllResultsScreen';
 import ResultDetailScreen from '@/screens/ResultDetailScreen';
+import ResultSourcesScreen from '@/screens/ResultSourcesScreen';
 
 const Stack = createNativeStackNavigator<HistoryStackParamList>();
 
 export function HistoryStack() {
   const { t } = useTranslation();
   return (
-    <Stack.Navigator screenOptions={{ headerShown: true }}>
+    <Stack.Navigator
+      // Every screen draws its own iOS-style NavBar (src/components/layout):
+      // native headers do not render on macOS / Windows.
+      screenOptions={{ headerShown: false }}
+    >
       <Stack.Screen
         name='History'
         component={HistoryScreen}
@@ -21,6 +27,16 @@ export function HistoryStack() {
         name='HistoryRun'
         component={HistoryRunScreen}
         options={{ title: t('history.runTitle') }}
+      />
+      <Stack.Screen
+        name='AllResults'
+        component={AllResultsScreen}
+        options={{ title: t('results.title') }}
+      />
+      <Stack.Screen
+        name='ResultSources'
+        component={ResultSourcesScreen}
+        options={{ title: t('resultSources.title') }}
       />
       <Stack.Screen
         name='ResultDetail'

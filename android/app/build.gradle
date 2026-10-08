@@ -103,9 +103,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.sudobility.raidragent'
+    namespace 'com.sudobility.raidr.agent'
     defaultConfig {
-        applicationId 'com.sudobility.raidragent'
+        applicationId 'com.sudobility.raidr.agent'
         manifestPlaceholders.googleMapsApiKey = findProperty('GOOGLE_MAPS_API_KEY') ?: System.getenv('GOOGLE_MAPS_API_KEY') ?: ''
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion

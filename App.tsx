@@ -24,6 +24,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ApiProvider } from '@/context/ApiContext';
 import { useAuth } from '@/context/AuthContext';
 import { ThemeProvider } from '@sudobility/building_blocks_rn';
+import { PortalHost } from '@sudobility/components-rn';
 import { ThemeVarsProvider } from '@/components/ThemeVarsProvider';
 import { AppNavigator } from '@/navigation';
 import SplashScreen from '@/screens/SplashScreen';
@@ -86,7 +87,14 @@ export default function App() {
             <AuthProvider>
               <ApiProvider>
                 <QueryClientProvider client={queryClient}>
-                  <AppContent />
+                  {/*
+                    Where portal-based overlays draw: on macOS and Windows the
+                    shared modals (SignInModal / LoginModal, FormModal) have no
+                    native Modal and render here. Without it they are invisible.
+                  */}
+                  <PortalHost>
+                    <AppContent />
+                  </PortalHost>
                 </QueryClientProvider>
               </ApiProvider>
             </AuthProvider>

@@ -27,7 +27,7 @@
 			<string>Google OAuth</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.REPLACE_WITH_IOS_CLIENT_ID</string>
+				<string>com.googleusercontent.apps.999780308719-loeaq0oo8crrjq1vb5hab4k55th3lifb</string>
 			</array>
 		</dict>
 	</array>
@@ -49,6 +49,8 @@
 		</dict>
 	</dict>
 	<key>NSLocationUsageDescription</key>
+	<string>Your location is used to find nearby results when you ask for nearby recommendations.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to find nearby results when you ask for nearby recommendations.</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>

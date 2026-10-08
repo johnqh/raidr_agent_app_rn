@@ -89,6 +89,24 @@ describe('settingsStore agent settings', () => {
       theme: 'system',
       agentMode: 'cloud',
       providerOrder: ['openai', 'anthropic', 'deepseek', 'openrouter'],
+      grantedPermissions: [],
     });
+  });
+
+  it('keeps known granted permissions once (v1 had none)', () => {
+    expect(
+      sanitizeSettings({
+        grantedPermissions: ['location', 'teleport', 'location'],
+      }).grantedPermissions
+    ).toEqual(['location']);
+  });
+
+  it('records a permission being allowed and taken back', () => {
+    const { setPermissionGranted } = useSettingsStore.getState();
+    setPermissionGranted('location', true);
+    setPermissionGranted('location', true);
+    expect(useSettingsStore.getState().grantedPermissions).toEqual(['location']);
+    setPermissionGranted('location', false);
+    expect(useSettingsStore.getState().grantedPermissions).toEqual([]);
   });
 });

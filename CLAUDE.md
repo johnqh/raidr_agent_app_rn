@@ -12,7 +12,7 @@ Platforms: **iOS, iPadOS, Android phone and tablet, macOS, Windows**.
 
 **Package**: `raidr_agent_app_rn` (private). Display name **raidr agent**,
 registry/component name **`RaidrAgent`**, bundle/application ID
-**`com.sudobility.raidragent`** everywhere.
+**`com.sudobility.raidr.agent`** everywhere.
 
 > **Status:** scaffolded 2026-10-02 from `mogulgame_app_rn`. Tabs: **Ask**
 > (Ask → Sites → Login web view → Results → ResultDetail), **History** and
@@ -36,9 +36,9 @@ registry/component name **`RaidrAgent`**, bundle/application ID
 
 ```bash
 bun install
-bun run start          # Metro on port 8090
+bun run start          # Metro on port 8094
 bun run ios            # react-native run-ios     (scheme RaidrAgent)
-bun run android        # react-native run-android (com.sudobility.raidragent)
+bun run android        # react-native run-android (com.sudobility.raidr.agent)
 bun run macos          # react-native run-macos   (scheme RaidrAgent-macOS)
 bun run windows        # run-windows (windows/RaidrAgent.sln)
 bun run typecheck      # tsc --noEmit
@@ -67,8 +67,8 @@ step is skipped.
 | --- | --- | --- |
 | iOS | `ios/RaidrAgent.xcworkspace` | scheme + target `RaidrAgent`, `ios/RaidrAgent/` sources |
 | macOS | `macos/RaidrAgent.xcworkspace` | target + scheme `RaidrAgent-macOS` (what `run-macos` infers from the workspace name), `macos/RaidrAgent-macOS/` |
-| Android | `android/app` | `namespace`/`applicationId` `com.sudobility.raidragent`, Kotlin in `java/com/sudobility/raidragent/` |
-| Windows | `windows/RaidrAgent.sln` | `RaidrAgent.vcxproj`, `RaidrAgent.Package` (identity `com.sudobility.raidragent`) |
+| Android | `android/app` | `namespace`/`applicationId` `com.sudobility.raidr.agent`, Kotlin in `java/com/sudobility/raidr/agent/` |
+| Windows | `windows/RaidrAgent.sln` | `RaidrAgent.vcxproj`, `RaidrAgent.Package` (identity `com.sudobility.raidr.agent`) |
 
 The JS component is registered as `RaidrAgent` (`app.json` `name`), and each
 native host asks for that name: `SceneDelegate.swift`, `AppDelegate.mm`
@@ -113,13 +113,50 @@ response body. On iOS/Android pass `expo/fetch` to the chat transport
 (`new DefaultChatTransport({ api, fetch: expoFetch as unknown as typeof fetch })`);
 macOS and Windows have no `expo/fetch` and need their own streaming fetch.
 
-`@ai-sdk/react` 4 declares `react: ~19.1.2`, and RN 0.81 pins `react` 19.1.0
-(the renderer must match exactly), so bun prints an "incorrect peer dependency"
-warning. It is expected; do not bump `react` past what RN 0.81 ships.
+**`react` 19.1.4, `react-native` 0.81.6 and `react-native-macos` 0.81.9 are a
+locked trio** (with `react-test-renderer` 19.1.4). Each ships a renderer built
+for one exact React version and asserts it at load: react-native-macos 0.81.2's
+renderer was 19.1.4 while the app had 19.1.0, so macOS hung on "Loading…
+100%" with "Incompatible React versions" in the JS console. Change all of them
+together, and check `Libraries/Renderer/implementations/*-dev.js` in both
+`react-native` and `react-native-macos` for the version they assert.
+
+## Navigation and layout
+
+iOS-style on every platform. Each step is its own screen in a native stack
+(`AskStack`, `HistoryStack`, `SettingsStack`; bottom tabs on mobile, the
+sidebar on desktop). Native headers are **off** (`headerShown: false`): they do
+not render on macOS/Windows. Every screen renders `Screen`
+(`src/components/layout/Screen.tsx`), whose `NavBar` shows a back chevron when
+the stack can go back, the centred title, and an optional `headerRight`.
+
+- `layout='list'` for list content, laid out by `TileGrid`: one column below
+  700pt (iOS regular width, measured on the grid itself), else 2–4 tile
+  columns (`columnsFor`). Sites, Results/All results/History cards, progress,
+  Result sources.
+- `layout='center'` (default) for everything else: a 640pt column in the
+  middle; `valign='center'` also centres it vertically (Ask, permission
+  screens), `top` (default) starts under the bar (Settings, forms, details).
+- `layout='fill'` for web views/maps. `footer` holds a fixed Next/Run bar.
+- **No SVG icons in chrome**: react-native-svg is not built for macOS, so
+  heroicons draw nothing there (the sidebar's tab icons are blank on macOS).
+  The back chevron is drawn with Views; permission screens use a glyph.
+
+**Permission screens** (`PermissionScreen`, `src/lib/permissions.ts`): their
+own screen with text and the call to action in the middle, never left in the
+back stack. Go through `usePermissionGate().goWith(kind, next)`: the first time
+it opens `Permission` with the route to continue to, which on success
+*replaces* itself with it (screen 1 → permission → screen 2; back on screen 2
+returns to screen 1); "Not now" goes back. Once allowed
+(`settingsStore.grantedPermissions`) the permission is used in place and the
+next screen opens directly; if it stopped working the screen shows again. Add
+a kind in `src/lib/permissionKinds.ts` (pure, persisted), its `allow` in
+`PERMISSIONS`, and strings under `permission.<kind>`.
 
 ## Agent flow
 
-Ask → Sites → Prepare → Results (`src/navigation/AskStack.tsx`); transient
+Ask → (Permission) → Sites → Prepare → Results → (All results) → Result
+sources / Result detail (`src/navigation/AskStack.tsx`); transient
 state in `src/stores/runFlowStore.ts` (request, intent, candidates, location,
 `plan`, `inputs`). `src/lib/agentFlow.ts` picks cloud or local per call and is
 the only place the cloud flow calls `RaidrAgentClient`.
@@ -127,8 +164,13 @@ the only place the cloud flow calls `RaidrAgentClient`.
 - **Ask**: `understandRequest` with the device context (`src/lib/deviceContext.ts`:
   country via `react-native-localize`, locale, time zone, `now` with offset).
   Returns the six-W `AgentIntent` (incl. `selection`) and ranked candidates (with `reason`).
-- **Sites**: `single` → radio (exactly one, top one preselected); `best`/`all` →
-  checkboxes (1–8). Rules in `src/lib/sites.ts`.
+- **Sites**: `single` → radio (exactly one, top one preselected); `best`/`all` (top 3 preselected) →
+  checkboxes (1–8). Rules in `src/lib/sites.ts`. Rows show the site's **domain**
+  (`siteDomain`: first origin without `www.`, never the catalog's "… API" title)
+  and its icon (`CandidateSite.iconUrl`, `SiteIcon` falls back to the first
+  letter). Every screen that names a site (Prepare, Results progress, History,
+  result cards) does the same through `useSiteBadges(apiHosts)`: seeded from the
+  candidates, else `GET /sites/:apiHost/icon` (`{ domain, iconUrl }`), cached a day.
 - **Prepare** (`PrepareScreen`): per-site plans (tools, `login`
   required/fallback/none, `unsupported`) and one merged `FormField[]` form
   (`src/components/PreparedFormField.tsx`). Run needs a valid form and every
@@ -136,7 +178,14 @@ the only place the cloud flow calls `RaidrAgentClient`.
   401/403 retry) in `src/lib/prepare.ts`. Tokens go with `required` and
   `fallback` sites when stored, never with `none` sites.
 - **Results**: `single`/`best` show the `data-best` pick in full with its reason
-  and "See all N results"; `all` lists (map toggle for location intents). A
+  and "See all N results"; `all` lists (map toggle for location intents). In an
+  `all` run, `data-groups` (the `dedupe` step, after every site finished) merges
+  the same thing from several sites into one row (`displayItems` in
+  `src/lib/results.ts`); each card shows its sites' icons lower-left ("On N
+  sites" when merged). A merged row opens **Result sources**
+  (`ResultSourcesScreen`): one row per copy with icon, domain and what sets it
+  apart (the step's note, else a price-like field) → that copy's detail. A
+  one-site sign-in retry drops the groups. A
   `fallback` site whose calls all failed 401/403 offers "Sign in to <site> and
   retry" (re-runs that site only). Detail's "Open on <site>" opens `pageUrl`
   with `Linking.openURL`; hidden when `pageUrl` is ''. History renders runs the
@@ -183,18 +232,16 @@ because zod 4 (pulled in by the runner) uses `export * as`.
 `@sudobility/raidr_agent_lib` (repos in `~/projects/raidr_agent_{types,client,lib}`)
 and `@sudobility/raidr_types` are on npm and in `dependencies`. Releases go
 through `~/projects/raidr_app/scripts/push_all.sh`, which publishes them in
-dependency order before this app. The backend is `raidr_agent_api` (port 8040,
+dependency order before this app. The backend is `raidr_agent_api` (port 8038,
 the `VITE_API_URL` default).
 
 ## Configuration that needs real values
 
-- `ios/RaidrAgent/GoogleService-Info.plist` — **placeholder**. Replace with the
-  Firebase iOS app config for `com.sudobility.raidragent`.
-- `android/app/google-services.json` — **placeholder**. Replace with the Firebase
-  Android app config for `com.sudobility.raidragent`.
-- URL scheme `com.googleusercontent.apps.REPLACE_WITH_IOS_CLIENT_ID` in
-  `ios/RaidrAgent/Info.plist` and `macos/RaidrAgent-macOS/Info.plist` — set to
-  the real `REVERSED_CLIENT_ID`.
+- `ios/RaidrAgent/GoogleService-Info.plist` and `android/app/google-services.json`
+  are the real configs of Firebase project `raidr-agent` for
+  `com.sudobility.raidr.agent` (the Android build fails, and iOS warns, if the
+  app ID and these files disagree). The Google URL scheme in both
+  `Info.plist`s is that plist's `REVERSED_CLIENT_ID`.
 - `.env` (copy `.env.example`) — `FIREBASE_*` for the desktop web apps,
   `GOOGLE_OAUTH_CLIENT_ID_MACOS`, `GOOGLE_OAUTH_CLIENT_ID_WINDOWS`,
   `GOOGLE_OAUTH_CLIENT_SECRET_WINDOWS`, `VITE_API_URL`. All names are listed in
@@ -242,7 +289,7 @@ nothing to do with the app account.
 
 ## Gotchas
 
-- Metro runs on port **8090**.
+- Metro runs on port **8094**.
 - NativeWind's JSX transform is Metro-only; JSX behaves differently under Jest.
 - `jest.config.js` maps only `^@/(.*)$`; `@/assets/*` is not mapped, so tests that import `src/i18n` fail to resolve.
 - `react-native.config.js` disables native Firebase and Google Sign-In on macOS; desktop auth is the Firebase JS SDK + WebAuth PKCE.

@@ -45,7 +45,8 @@ RCT_REMAP_METHOD(getCurrentLocation,
 - (void)locationManagerDidChangeAuthorization:(CLLocationManager *)manager
 {
   CLAuthorizationStatus status = manager.authorizationStatus;
-  if (status == kCLAuthorizationStatusAuthorizedAlways || status == kCLAuthorizationStatusAuthorizedWhenInUse) {
+  // macOS has no "when in use" status; an authorized app is AuthorizedAlways.
+  if (status == kCLAuthorizationStatusAuthorizedAlways) {
     [manager requestLocation];
   } else if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted) {
     [self finishWithError:@"Location permission was denied"];

@@ -11,14 +11,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sudobility.raidragent"
+      "bundleIdentifier": "com.sudobility.raidr.agent"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.sudobility.raidragent"
+      "package": "com.sudobility.raidr.agent"
     }
   }
 }

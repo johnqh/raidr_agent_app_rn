@@ -19,7 +19,7 @@ import type { FirebaseWebConfig } from '@sudobility/auth_lib/signin';
 
 export const env = {
   // API URL
-  API_URL: process.env.VITE_API_URL ?? 'http://localhost:8040',
+  API_URL: process.env.VITE_API_URL ?? 'http://localhost:8038',
 
   // App identity
   APP_NAME: process.env.VITE_APP_NAME ?? 'raidr agent',

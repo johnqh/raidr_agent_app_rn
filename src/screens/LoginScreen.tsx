@@ -52,7 +52,7 @@ import React, {
   useState,
 } from 'react';
 import { View, Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Screen from '@/components/layout/Screen';
 import { WebView } from 'react-native-webview';
 import type {
   WebViewMessageEvent,
@@ -390,19 +390,13 @@ export default function LoginScreen({ route, navigation }: LoginScreenProps) {
   }, [watcher, finish, navigation]);
 
   return (
-    <SafeAreaView
-      className='flex-1 bg-background'
-      edges={['top', 'left', 'right']}
-    >
-      <View className='flex-row items-center justify-between px-4 py-3 border-b border-foreground/10'>
-        <View className='flex-1 mr-3'>
-          <Text size='base' weight='semibold'>
-            {t('login.title')}
-          </Text>
-          <Text size='sm' color='muted'>
-            {t('login.subtitle', { host: apiHost })}
-          </Text>
-        </View>
+    <Screen
+      title={t('login.title')}
+      layout='fill'
+      // Presented as a modal: Close (which keeps a token already captured)
+      // instead of a back chevron.
+      hideBack
+      headerRight={
         <Button
           variant='ghost'
           size='sm'
@@ -411,6 +405,12 @@ export default function LoginScreen({ route, navigation }: LoginScreenProps) {
         >
           {t('login.close')}
         </Button>
+      }
+    >
+      <View className='px-4 py-2 border-b border-foreground/10 bg-card'>
+        <Text size='sm' color='muted' className='text-center'>
+          {t('login.subtitle', { host: apiHost })}
+        </Text>
       </View>
 
       {siteAuthQuery.isLoading ? (
@@ -496,6 +496,6 @@ export default function LoginScreen({ route, navigation }: LoginScreenProps) {
           ) : null}
         </View>
       ) : null}
-    </SafeAreaView>
+    </Screen>
   );
 }

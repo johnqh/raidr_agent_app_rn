@@ -1,27 +1,43 @@
 {
-  "_comment": "PLACEHOLDER. Replace this file with the google-services.json the Firebase console generates for the Android app com.sudobility.raidragent (register the debug and release SHA-1s for Google Sign-In).",
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "replace-with-firebase-project-id",
-    "storage_bucket": "replace-with-firebase-project-id.firebasestorage.app"
+    "project_number": "999780308719",
+    "project_id": "raidr-agent",
+    "storage_bucket": "raidr-agent.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:999780308719:android:a6322af3c93e91c117ed1a",
         "android_client_info": {
-          "package_name": "com.sudobility.raidragent"
+          "package_name": "com.sudobility.raidr.agent"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "999780308719-rv8nrtsgge31mtpshqef13e2tssuosb0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "REPLACE_WITH_FIREBASE_ANDROID_API_KEY"
+          "current_key": "AIzaSyC9Vu4Y8mM1PQzbQXxRTt_6lQbk3o3i98E"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "999780308719-rv8nrtsgge31mtpshqef13e2tssuosb0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "999780308719-loeaq0oo8crrjq1vb5hab4k55th3lifb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sudobility.raidr.agent"
+              }
+            }
+          ]
         }
       }
     }

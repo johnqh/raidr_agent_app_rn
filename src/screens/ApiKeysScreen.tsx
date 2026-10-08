@@ -30,7 +30,6 @@ import React, {
 import {
   View,
   Pressable,
-  ScrollView,
   Animated,
   PanResponder,
   Alert,
@@ -40,7 +39,7 @@ import {
   type LayoutChangeEvent,
   type PanResponderInstance,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Screen from '@/components/layout/Screen';
 import {
   Text,
   Button,
@@ -52,7 +51,6 @@ import {
 } from '@sudobility/components-rn';
 import { Bars3Icon } from 'react-native-heroicons/outline';
 import { useTranslation } from 'react-i18next';
-import { useTabBarHeight } from '@/hooks/useTabBarHeight';
 import { useAppColors } from '@/hooks/useAppColors';
 import { useLlmKeys } from '@/hooks/useLlmKeys';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -306,7 +304,6 @@ interface DragState {
 
 export default function ApiKeysScreen(_props: ApiKeysScreenProps) {
   const { t } = useTranslation();
-  const tabBarHeight = useTabBarHeight();
   const colors = useAppColors();
   const agentMode = useSettingsStore(s => s.agentMode);
   const setAgentMode = useSettingsStore(s => s.setAgentMode);
@@ -498,92 +495,82 @@ export default function ApiKeysScreen(_props: ApiKeysScreenProps) {
   // ---- render -------------------------------------------------------------
 
   return (
-    <SafeAreaView className='flex-1 bg-background' edges={['left', 'right']}>
-      <ScrollView
-        scrollEnabled={dragging === null}
-        keyboardShouldPersistTaps='handled'
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: tabBarHeight + 16 },
-        ]}
-      >
-        {/* Mode */}
-        <View className='mb-7'>
-          <SectionTitle>{t('apiKeys.modeSection')}</SectionTitle>
-          <Tabs value={agentMode} onValueChange={handleModeChange}>
-            <TabsList>
-              <TabsTrigger value='cloud'>{t('apiKeys.mode.cloud')}</TabsTrigger>
-              <TabsTrigger value='local' disabled={!localAllowed}>
-                {t('apiKeys.mode.local')}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <View className='mt-3 px-1'>
-            <Text size='sm' color={agentMode === 'cloud' ? 'default' : 'muted'}>
-              <Text size='sm' weight='semibold'>
-                {t('apiKeys.mode.cloud')}
-                {': '}
-              </Text>
-              {t('apiKeys.cloudDescription')}
+    <Screen title={t('apiKeys.title')} scrollEnabled={dragging === null}>
+      {/* Mode */}
+      <View className='mb-7'>
+        <SectionTitle>{t('apiKeys.modeSection')}</SectionTitle>
+        <Tabs value={agentMode} onValueChange={handleModeChange}>
+          <TabsList>
+            <TabsTrigger value='cloud'>{t('apiKeys.mode.cloud')}</TabsTrigger>
+            <TabsTrigger value='local' disabled={!localAllowed}>
+              {t('apiKeys.mode.local')}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <View className='mt-3 px-1'>
+          <Text size='sm' color={agentMode === 'cloud' ? 'default' : 'muted'}>
+            <Text size='sm' weight='semibold'>
+              {t('apiKeys.mode.cloud')}
+              {': '}
             </Text>
-            <Text
-              size='sm'
-              color={agentMode === 'local' ? 'default' : 'muted'}
-              className='mt-1'
-            >
-              <Text size='sm' weight='semibold'>
-                {t('apiKeys.mode.local')}
-                {': '}
-              </Text>
-              {t('apiKeys.localDescription')}
+            {t('apiKeys.cloudDescription')}
+          </Text>
+          <Text
+            size='sm'
+            color={agentMode === 'local' ? 'default' : 'muted'}
+            className='mt-1'
+          >
+            <Text size='sm' weight='semibold'>
+              {t('apiKeys.mode.local')}
+              {': '}
             </Text>
-            {!localAllowed && !loading ? (
-              <View className='mt-2' testID='api-keys-local-disabled'>
-                <Text size='sm' color='warning'>
-                  {t('apiKeys.localDisabled')}
-                </Text>
-              </View>
-            ) : null}
-          </View>
+            {t('apiKeys.localDescription')}
+          </Text>
+          {!localAllowed && !loading ? (
+            <View className='mt-2' testID='api-keys-local-disabled'>
+              <Text size='sm' color='warning'>
+                {t('apiKeys.localDisabled')}
+              </Text>
+            </View>
+          ) : null}
         </View>
+      </View>
 
-        {/* Providers */}
-        <View className='mb-7'>
-          <SectionTitle>{t('apiKeys.providersSection')}</SectionTitle>
-          <View className='rounded-lg overflow-hidden bg-card'>
-            {providerOrder.map((provider, index) => (
-              <ProviderRow
-                key={provider}
-                provider={provider}
-                index={index}
-                count={providerOrder.length}
-                mask={masks[provider]}
-                expanded={expanded === provider}
-                dragging={dragging === provider}
-                translateY={anims[provider]}
-                panHandlers={panResponders[provider].panHandlers}
-                handleColor={colors.textMuted}
-                onLayout={handleLayout}
-                onToggle={handleToggle}
-                onMove={moveBy}
-                onSave={handleSave}
-                onRemove={handleRemove}
-              />
-            ))}
-          </View>
-          <Text size='sm' color='muted' className='mt-2 px-1'>
-            {t('apiKeys.orderNote')}
-          </Text>
-          <Text size='sm' color='muted' className='mt-1 px-1'>
-            {t('apiKeys.storageNote')}
-          </Text>
+      {/* Providers */}
+      <View className='mb-7'>
+        <SectionTitle>{t('apiKeys.providersSection')}</SectionTitle>
+        <View className='rounded-lg overflow-hidden bg-card'>
+          {providerOrder.map((provider, index) => (
+            <ProviderRow
+              key={provider}
+              provider={provider}
+              index={index}
+              count={providerOrder.length}
+              mask={masks[provider]}
+              expanded={expanded === provider}
+              dragging={dragging === provider}
+              translateY={anims[provider]}
+              panHandlers={panResponders[provider].panHandlers}
+              handleColor={colors.textMuted}
+              onLayout={handleLayout}
+              onToggle={handleToggle}
+              onMove={moveBy}
+              onSave={handleSave}
+              onRemove={handleRemove}
+            />
+          ))}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+        <Text size='sm' color='muted' className='mt-2 px-1'>
+          {t('apiKeys.orderNote')}
+        </Text>
+        <Text size='sm' color='muted' className='mt-1 px-1'>
+          {t('apiKeys.storageNote')}
+        </Text>
+      </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16 },
   dragging: { zIndex: 10, elevation: 6, opacity: 0.95 },
 });

@@ -10,6 +10,7 @@
  * Version history:
  * - 0: `{ theme }`
  * - 1: adds `agentMode` and `providerOrder`
+ * - 2: adds `grantedPermissions`
  */
 
 import { create } from 'zustand';
@@ -22,6 +23,10 @@ import {
   normalizeProviderOrder,
   type AgentMode,
 } from '@/lib/agentMode';
+import {
+  normalizePermissions,
+  type PermissionKind,
+} from '@/lib/permissionKinds';
 
 export type { AgentMode } from '@/lib/agentMode';
 
@@ -35,6 +40,12 @@ interface PersistedSettings {
   agentMode: AgentMode;
   /** Local-mode provider preference; the first one with a key is used. */
   providerOrder: LocalLlmProvider[];
+  /**
+   * Permissions the user allowed on a permission screen. Their screen is
+   * skipped next time (the OS prompt has been answered); if using the
+   * permission then fails, the screen is shown again.
+   */
+  grantedPermissions: PermissionKind[];
 }
 
 /** Shape of the settings Zustand store. */
@@ -45,6 +56,8 @@ interface SettingsState extends PersistedSettings {
   setAgentMode: (agentMode: AgentMode) => void;
   /** Replace the provider preference order (normalised to every provider once). */
   setProviderOrder: (providerOrder: readonly LocalLlmProvider[]) => void;
+  /** Record whether a permission was allowed. */
+  setPermissionGranted: (kind: PermissionKind, granted: boolean) => void;
   /** Reset all settings to their initial defaults. */
   reset: () => void;
 }
@@ -54,6 +67,7 @@ const initialState: PersistedSettings = {
   theme: 'system',
   agentMode: 'cloud',
   providerOrder: [...DEFAULT_PROVIDER_ORDER],
+  grantedPermissions: [],
 };
 
 const THEMES: readonly ThemeMode[] = ['system', 'light', 'dark'];
@@ -72,6 +86,7 @@ export function sanitizeSettings(persisted: unknown): PersistedSettings {
       : initialState.theme,
     agentMode: normalizeAgentMode(p.agentMode),
     providerOrder: normalizeProviderOrder(p.providerOrder),
+    grantedPermissions: normalizePermissions(p.grantedPermissions),
   };
 }
 
@@ -92,17 +107,28 @@ export const useSettingsStore = create<SettingsState>()(
       setAgentMode: agentMode => set({ agentMode }),
       setProviderOrder: providerOrder =>
         set({ providerOrder: normalizeProviderOrder(providerOrder) }),
+      setPermissionGranted: (kind, granted) =>
+        set(state => ({
+          grantedPermissions: granted
+            ? [...new Set([...state.grantedPermissions, kind])]
+            : state.grantedPermissions.filter(k => k !== kind),
+        })),
       reset: () =>
-        set({ ...initialState, providerOrder: [...DEFAULT_PROVIDER_ORDER] }),
+        set({
+          ...initialState,
+          providerOrder: [...DEFAULT_PROVIDER_ORDER],
+          grantedPermissions: [],
+        }),
     }),
     {
       name: 'raidr-agent-settings',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => AsyncStorage),
       partialize: state => ({
         theme: state.theme,
         agentMode: state.agentMode,
         providerOrder: state.providerOrder,
+        grantedPermissions: state.grantedPermissions,
       }),
       // Older versions lack the agent fields; sanitizing fills the defaults.
       migrate: persisted => sanitizeSettings(persisted),

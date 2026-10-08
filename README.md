@@ -24,13 +24,13 @@ cd ios && pod install && cd ..
 bun run ios                   # or: android | macos | windows
 ```
 
-Metro runs on port 8090 (`bun run start`).
+Metro runs on port 8094 (`bun run start`).
 
 ## Scripts
 
 | Script | What it does |
 | --- | --- |
-| `bun run start` | Metro bundler on :8090 |
+| `bun run start` | Metro bundler on :8094 |
 | `bun run ios` / `android` / `macos` / `windows` | Build and run on that platform |
 | `bun run typecheck` | `tsc --noEmit` |
 | `bun run lint` | ESLint |
@@ -43,10 +43,9 @@ Metro runs on port 8090 (`bun run start`).
 Firebase / Google sign-in need real values before sign-in works:
 
 - `ios/RaidrAgent/GoogleService-Info.plist` and `android/app/google-services.json`
-  are placeholders — replace them with the Firebase configs for
-  `com.sudobility.raidragent`.
-- Set the Google URL scheme (`REVERSED_CLIENT_ID`) in `ios/RaidrAgent/Info.plist`
-  and `macos/RaidrAgent-macOS/Info.plist`.
+  are the real Firebase configs (project `raidr-agent`) for
+  `com.sudobility.raidr.agent`; the Google URL scheme in both `Info.plist`s is
+  their `REVERSED_CLIENT_ID`.
 - `.env` holds the desktop Firebase web-app values, desktop Google OAuth clients
   and `VITE_API_URL`; `.env.example` documents each one.
 
