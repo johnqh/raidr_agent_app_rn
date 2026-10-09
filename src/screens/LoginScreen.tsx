@@ -62,7 +62,6 @@ import type {
   ShouldStartLoadRequest,
   WebViewOpenWindowEvent,
 } from 'react-native-webview/lib/WebViewTypes';
-import type { CookieManagerStatic } from '@react-native-cookies/cookies';
 import { Text, Button, Spinner } from '@sudobility/components-rn';
 import { useTranslation } from 'react-i18next';
 import {
@@ -76,7 +75,7 @@ import type { CapturedCredential } from '@sudobility/raidr_types';
 import { useSiteAuth } from '@sudobility/raidr_agent_client';
 import { useApi } from '@/context/ApiContext';
 import { useAuth } from '@/context/AuthContext';
-import { saveSiteToken } from '@/lib/secureStorage';
+import { getCookieManager, saveSiteSession } from '@/lib/siteSessions';
 import {
   buildOpenerDeliveryScript,
   buildPopupBridgeScript,
@@ -90,20 +89,10 @@ import {
   WINDOW_CLOSE_KIND,
 } from '@/lib/webAuth';
 import { trackScreenView, trackEvent } from '@/analytics';
+import { useAgentEmail } from '@/hooks/useAgentEmail';
+import { getOrCreateAgentLogin } from '@/lib/passwordVault';
+import { buildAutofillScript, isAutofillResult } from '@/lib/autofill';
 import type { LoginScreenProps } from '@/navigation/types';
-
-/** Lazily load the cookie manager; it is iOS/Android only. */
-function getCookieManager(): CookieManagerStatic | null {
-  if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
-    return null;
-  }
-  try {
-    return require('@react-native-cookies/cookies')
-      .default as CookieManagerStatic;
-  } catch {
-    return null;
-  }
-}
 
 /** What a web view shows; a new `key` remounts it (to apply a user agent). */
 interface WebViewPage {
@@ -128,7 +117,7 @@ const SHARED_WEBVIEW_PROPS = {
 } as const;
 
 export default function LoginScreen({ route, navigation }: LoginScreenProps) {
-  const { apiHost } = route.params;
+  const { apiHost, purpose = 'run' } = route.params;
   const { t } = useTranslation();
 
   const { networkClient, baseUrl } = useApi();
@@ -157,6 +146,12 @@ export default function LoginScreen({ route, navigation }: LoginScreenProps) {
   const [popup, setPopup] = useState<WebViewPage | null>(null);
   /** The popup has loaded a real page (so a later `about:blank` means done). */
   const popupLoadedRef = useRef(false);
+
+  // Agent email autofill: offered when an agent email is set up and its
+  // "use automatically" toggle is on. A short note after a fill attempt.
+  const { emailAddress: agentEmail, useAutomatically: agentEmailOn } =
+    useAgentEmail();
+  const [autofillNote, setAutofillNote] = useState<string | null>(null);
 
   useEffect(() => {
     if (siteAuth) {
@@ -195,24 +190,40 @@ export default function LoginScreen({ route, navigation }: LoginScreenProps) {
       }
       finishedRef.current = true;
       (async () => {
-        await saveSiteToken(apiHost, credential.token);
+        await saveSiteSession(
+          apiHost,
+          credential.token,
+          siteAuth?.loginUrl ?? ''
+        );
         setAuthorized(apiHost, true);
-        select(apiHost, true);
+        if (purpose === 'run') {
+          select(apiHost, true);
+        }
         navigation.goBack();
       })();
     },
-    [apiHost, setAuthorized, select, navigation]
+    [apiHost, purpose, siteAuth, setAuthorized, select, navigation]
   );
 
   const handleMessage = useCallback(
     (event: WebViewMessageEvent) => {
-      if (!watcher || finishedRef.current) {
-        return;
-      }
       let parsed: unknown;
       try {
         parsed = JSON.parse(event.nativeEvent.data);
       } catch {
+        return;
+      }
+      // The agent-email autofill reports back here, whether or not a token
+      // watcher is running yet.
+      if (isAutofillResult(parsed)) {
+        setAutofillNote(
+          parsed.email || parsed.password > 0
+            ? t('login.autofill.filled')
+            : t('login.autofill.noFields')
+        );
+        return;
+      }
+      if (!watcher || finishedRef.current) {
         return;
       }
       if (
@@ -239,8 +250,35 @@ export default function LoginScreen({ route, navigation }: LoginScreenProps) {
       }
       finish(watcher.observe(observed));
     },
-    [watcher, siteAuth, finish]
+    [watcher, siteAuth, finish, t]
   );
+
+  /**
+   * Fill the agent email and its generated password into the site's form in
+   * the main web view. Never submits — the user presses the site's button.
+   */
+  const fillWithAgentEmail = useCallback(async () => {
+    if (!agentEmail) {
+      return;
+    }
+    trackEvent('agent_email_autofill');
+    setAutofillNote(null);
+    try {
+      const domain =
+        parseHttpUrl(siteAuth?.loginUrl ?? '')?.host?.replace(/^www\./, '') ??
+        apiHost;
+      const credential = await getOrCreateAgentLogin(
+        apiHost,
+        domain,
+        agentEmail
+      );
+      mainRef.current?.injectJavaScript(
+        buildAutofillScript(credential.email, credential.password)
+      );
+    } catch {
+      setAutofillNote(t('login.autofill.failed'));
+    }
+  }, [agentEmail, apiHost, siteAuth, t]);
 
   const handleNavigationStateChange = useCallback(
     (_navState: WebViewNavigation) => {
@@ -411,6 +449,26 @@ export default function LoginScreen({ route, navigation }: LoginScreenProps) {
         <Text size='sm' color='muted' className='text-center'>
           {t('login.subtitle', { host: apiHost })}
         </Text>
+        {/* Offer the agent email on the site's own form, never in an OAuth
+            popup. Fills email + a generated password; the user submits. */}
+        {agentEmail && agentEmailOn && siteAuth && !popup ? (
+          <View className='flex-row items-center justify-center mt-2'>
+            <Button
+              variant='outline'
+              size='sm'
+              onPress={fillWithAgentEmail}
+              accessibilityLabel={t('login.autofill.cta')}
+              testID='login-use-agent-email'
+            >
+              {t('login.autofill.cta')}
+            </Button>
+          </View>
+        ) : null}
+        {autofillNote ? (
+          <Text size='xs' color='muted' className='text-center mt-1'>
+            {autofillNote}
+          </Text>
+        ) : null}
       </View>
 
       {siteAuthQuery.isLoading ? (

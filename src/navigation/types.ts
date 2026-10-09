@@ -11,6 +11,7 @@ import type {
 } from '@sudobility/raidr_agent_types';
 import type { ResultCopy } from '@/lib/results';
 import type { PermissionKind } from '@/lib/permissionKinds';
+import type { SettingsSectionId } from '@/screens/settings/sections';
 
 /** Result detail: the item, and why it was picked when it is the best one. */
 export type ResultDetailParams = { item: ResultItem; reason?: string };
@@ -31,12 +32,19 @@ export type NextRoute = { name: string; params?: Record<string, unknown> };
 /** A permission screen: which permission, and where to go once allowed. */
 export type PermissionParams = { kind: PermissionKind; next: NextRoute };
 
+/**
+ * Sign in to a site in a web view. `purpose: 'credential'` (Settings → Add
+ * credential) only stores the sign-in; the default also selects the site
+ * for the run being prepared.
+ */
+export type LoginParams = { apiHost: string; purpose?: 'run' | 'credential' };
+
 export type AskStackParamList = {
   Ask: undefined;
   Permission: PermissionParams;
   Sites: undefined;
   Prepare: undefined;
-  Login: { apiHost: string };
+  Login: LoginParams;
   Results: undefined;
   AllResults: AllResultsParams;
   ResultSources: ResultSourcesParams;
@@ -51,8 +59,20 @@ export type HistoryStackParamList = {
   ResultDetail: ResultDetailParams;
 };
 
+/** Settings → Credentials → Add credential: find a site, then sign in. */
+export type AddCredentialStackParamList = {
+  FindSite: undefined;
+  Login: LoginParams;
+};
+
+export type FindSiteScreenProps = NativeStackScreenProps<
+  AddCredentialStackParamList,
+  'FindSite'
+>;
+
 export type SettingsStackParamList = {
   Settings: undefined;
+  SettingsSection: { section: SettingsSectionId };
   ApiKeys: undefined;
 };
 
@@ -77,10 +97,14 @@ export type PermissionScreenProps = NativeStackScreenProps<
   AskStackParamList,
   'Permission'
 >;
-export type LoginScreenProps = NativeStackScreenProps<
-  AskStackParamList,
-  'Login'
->;
+/**
+ * The Login screen runs in the Ask stack and in Add credential's stack, so
+ * its props are only what it uses.
+ */
+export type LoginScreenProps = {
+  route: { params: LoginParams };
+  navigation: { goBack: () => void };
+};
 export type ResultsScreenProps = NativeStackScreenProps<
   AskStackParamList,
   'Results'
@@ -99,6 +123,11 @@ export type HistoryRunScreenProps = NativeStackScreenProps<
 export type SettingsScreenProps = NativeStackScreenProps<
   SettingsStackParamList,
   'Settings'
+>;
+
+export type SettingsSectionScreenProps = NativeStackScreenProps<
+  SettingsStackParamList,
+  'SettingsSection'
 >;
 
 export type ApiKeysScreenProps = NativeStackScreenProps<

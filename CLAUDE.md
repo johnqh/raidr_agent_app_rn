@@ -16,7 +16,8 @@ registry/component name **`RaidrAgent`**, bundle/application ID
 
 > **Status:** scaffolded 2026-10-02 from `mogulgame_app_rn`. Tabs: **Ask**
 > (Ask → Sites → Login web view → Results → ResultDetail), **History** and
-> **Settings** (→ **API Keys**). Runs go to the cloud (`POST /runs`) or, in
+> **Settings** (master/detail: Account, Appearance, Credentials, App
+> settings; → **API Keys**). Runs go to the cloud (`POST /runs`) or, in
 > local mode, run on the device (see "Local agent mode").
 
 ## Tech stack
@@ -225,6 +226,126 @@ raidr_agent_api and ShapeShyft to build each payload.
 
 `babel.config.js` includes `@babel/plugin-transform-export-namespace-from`
 because zod 4 (pulled in by the runner) uses `export * as`.
+
+## Settings
+
+`SettingsScreen` is master/detail (`src/components/layout/SplitView.tsx`):
+at ≥ 700pt (`REGULAR_WIDTH`, measured on the view) the section list is 300pt
+on the left and the chosen section shows beside it; narrower, each section is
+pushed as `SettingsSection` (`SettingsSectionScreen`). Sections are
+`src/screens/settings/` (ids and labels in `sections.ts`, a `Record` so a new
+one needs a label): **Account** (the app account; signing in opens
+`SignInModal`), **Appearance** (language and theme `Select`s and the version,
+copied from music_app_rn), **Credentials**, **App settings** (empty for now).
+API Keys stays its own screen, linked from the list.
+
+**Credentials** lists the sites signed in to on this device. The Keychain
+cannot enumerate its entries, so `LoginScreen` saves through
+`saveSiteSession` (`src/lib/siteSessions.ts`), which also records
+`{ apiHost, loginUrl, signedInAt }` (no token) in `credentialsStore`
+(AsyncStorage `raidr-agent-credentials`). Tokens saved before 2026-10-09 are
+not listed. Sign out (one, or all) deletes the Keychain token, the entry and
+the selection store's `authorized` mark, and clears the web view's cookies,
+since the shared cookie store would otherwise sign straight back in: iOS
+`clearByName` per cookie of `loginUrl` (WebKit store), Android expired
+overwrites + `flush`, all: `clearAll`. macOS/Windows have no cookie manager,
+so there only the token goes.
+
+**Add Credential** (`AddCredentialModal`): an RN `Modal` (page sheet) with
+its own native stack in a `NavigationIndependentTree`: `FindSite` (search
+box; `useSiteSearch` debounces 300 ms and calls `GET /sites/search` from 2
+characters) → the agent flow's own `LoginScreen` with `purpose: 'credential'`
+(stores the sign-in, does not select the site for a run), so web view,
+popups and the Google user-agent switch are one implementation. The modal
+gives its content a fresh `SafeAreaProvider` and a `BottomTabBarHeightContext`
+of 0 (the window's insets and the tab bar's height reach through the portal
+but are wrong there), and closes on Cancel, back, or once a sign-in made
+while it was open lands in `credentialsStore`. `LoginScreenProps` is
+structural (`route.params`, `navigation.goBack`) because two stacks host it.
+Needs raidr_agent_types/client with `SiteSearchHit` / `searchSites` (local
+`dist` copies in `node_modules` until they are published).
+
+## Agent Email (Settings → Agent Email)
+
+A Signic (`@sudobility/signic_sdk`) email address for the agent to use when a
+site asks for one: the mail those sites send (sign-in links, verification
+codes) lands in an inbox read on the device. The user signs up and confirms;
+this app does not create site accounts or confirm verifications on its own.
+
+- **Key** (`src/lib/agentWallet.ts`): a standard Ethereum key as a BIP-39
+  12-word seed phrase — `viem/accounts` (`generateMnemonic`,
+  `mnemonicToAccount`, path `m/44'/60'/0'/0/0`) with `@scure/bip39`'s
+  `validateMnemonic`. `react-native-get-random-values` is imported in
+  `index.ts` before anything uses `crypto.getRandomValues` (the bundle will
+  not generate a key without it). The email address is `<0xaddr>@<domain>`.
+- **Storage**: the seed phrase lives only in the Keychain / Keystore
+  (`agentWalletStore.ts`, service `raidr-agent-email-wallet`, in-memory
+  fallback like `secureStorage.ts`), never in JS storage or on a server. The
+  non-secret address + "use automatically" flag are in `agentEmailStore`
+  (AsyncStorage `raidr-agent-email`); the flag is off without an address.
+- **Mail** (`agentEmailService.ts`): builds a `SignicClient` whose
+  `signMessage` derives the wallet from the stored phrase, SIWE-connects once
+  and caches the session (`resetAgentEmailSession` on create/restore/remove;
+  a failed connect is not cached). `listAgentEmails` / `getAgentEmail` /
+  `markAgentEmailRead` / `sendAgentEmail`. The factory is injectable for
+  tests (no viem, no network). The inbox UI is not built yet — `useAgentInbox`
+  is the React Query hook it will read.
+- **Config** (`src/config/agentEmail.ts`): `VITE_SIGNIC_{INDEXER,WILDDUCK}_URL`
+  and `VITE_SIGNIC_EMAIL_DOMAIN`, defaulting to the public signic.email
+  endpoints (added to `env.ts` and `babel.config.js` `INLINED_ENV`).
+- **Section** (`AgentEmailSection`): no email → instructions + Create /
+  Restore; Create shows the new phrase in `SeedPhraseModal` (`backup` mode,
+  "I've saved it") before use; Restore (`RestoreEmailModal`) validates a
+  phrase before enabling the button. With an email → the address, the "use
+  automatically" `Switch`, Show Seed Phrases (`reveal` mode) and Remove
+  (deletes the Keychain phrase, confirmed first).
+- **Autofill in sign-up** (`LoginScreen`): when an agent email exists and its
+  "use automatically" toggle is on, the login web view shows **Use Agent
+  Email** on the site's own form (hidden while an OAuth popup is open). It
+  fills the agent address and a generated password and never submits — the
+  user presses the site's button. `agentCredentials.generatePassword` (crypto
+  getRandomValues, one of each category) and `agentCredentialStore` (Keychain
+  `raidr-agent-cred:<apiHost>`, one login per site, reused on return,
+  regenerated if the agent email changed — the "domain credentials, local and
+  encrypted"). `autofill.ts` (`buildAutofillScript`) sets field values via the
+  native setter + input/change events so a framework form registers them, and
+  posts an `AutofillResult` back; both values go in with `JSON.stringify` so a
+  password cannot break out of the script. It targets the first visible
+  email-like field and up to two password fields (password + confirm).
+## Passwords (Settings → Passwords)
+
+A password manager over the same per-site store the autofill writes, so an
+agent-email login and one the user typed sit in one list; the email may be the
+agent's Signic address or anything the user enters — it makes no difference.
+
+- **Store**: the password lives only in the Keychain (`agentCredentialStore`,
+  per `apiHost`); `passwordIndexStore` (AsyncStorage `raidr-agent-passwords`)
+  is the listable directory — `{ apiHost, domain, email, source, updatedAt }`,
+  no password — because the Keychain cannot enumerate. `passwordVault.ts`
+  keeps the two in step: `getOrCreateAgentLogin` (called by the sign-up
+  autofill, `source: 'agent'`), `saveManualLogin` (`source: 'manual'`, keyed
+  by `normalizeDomain`), `updateLogin`, `revealPassword` (reads the Keychain
+  on demand), `removeLogin`.
+- **Section** (`PasswordsSection`): a card per login (icon, domain, email,
+  the password hidden until Show reads it from the Keychain), with Edit and
+  Remove, and **Add Password** → `PasswordEntryModal` (website, email,
+  password with Show and Generate). Editing keeps the key and source; the
+  domain is fixed when editing. Removing deletes both the Keychain password
+  and the directory row.
+- **Copy** (`src/components/CopyButton.tsx`, `src/lib/clipboard.ts`):
+  `@react-native-clipboard/clipboard` (iOS/Android/macOS/Windows), required
+  lazily and guarded so an unlinked build or a test fails to `false` rather
+  than throwing. `CopyButton` takes a `text` or an on-demand `onCopy` (used to
+  read a password from the Keychain only when copied) and shows "Copied" for
+  ~1.5s. Used on the password rows (password + email), the password modal, the
+  agent email address, and the seed-phrase modal. `sensitive` copies via
+  `copySensitive`, which auto-clears the clipboard after `SENSITIVE_CLEAR_MS`
+  (60s) — but only while it still holds exactly what was copied, and any later
+  copy cancels the pending wipe. Passwords and the seed phrase are `sensitive`;
+  the email and address are not.
+- Jest maps `@sudobility/signic_sdk` to its `dist` entry (its package
+  `exports` has no CJS condition); tests mock it. components-rn `Text` takes
+  no `selectable`/`testID`.
 
 ## Sibling packages
 

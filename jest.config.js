@@ -10,6 +10,11 @@ module.exports = {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // signic_sdk's package.json exports only an ESM condition, which
+    // jest-resolve will not match under CJS; point it at its built entry
+    // (tests mock it, so the file is only resolved, not executed).
+    '^@sudobility/signic_sdk$':
+      '<rootDir>/node_modules/@sudobility/signic_sdk/dist/index.js',
   },
   setupFiles: ['./jest.setup.js'],
   testPathIgnorePatterns: ['/node_modules/'],

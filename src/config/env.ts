@@ -53,6 +53,14 @@ export const env = {
   GOOGLE_OAUTH_CLIENT_SECRET_WINDOWS:
     process.env.GOOGLE_OAUTH_CLIENT_SECRET_WINDOWS ?? '',
 
+  // Signic (Agent Email): the decentralized email service the agent address
+  // lives on. Defaults are the public signic.email endpoints.
+  SIGNIC_INDEXER_URL:
+    process.env.VITE_SIGNIC_INDEXER_URL ?? 'https://api.signic.email/idx',
+  SIGNIC_WILDDUCK_URL:
+    process.env.VITE_SIGNIC_WILDDUCK_URL ?? 'https://api.signic.email/api',
+  SIGNIC_EMAIL_DOMAIN: process.env.VITE_SIGNIC_EMAIL_DOMAIN ?? 'signic.email',
+
   // Development
   DEV_MODE: (process.env.VITE_DEV_MODE ?? 'false') === 'true',
 };

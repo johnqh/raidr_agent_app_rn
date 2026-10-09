@@ -1535,6 +1535,28 @@ PODS:
     - ReactNativeDependencies
   - react-native-cookies (6.2.1):
     - React-Core
+  - react-native-get-random-values (2.0.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-in-app-review (4.4.2):
     - React-Core
   - react-native-maps (1.20.1):
@@ -2048,6 +2070,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNCClipboard (1.16.3):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RNFBAnalytics (26.4.0):
     - FirebaseAnalytics/Core (= 12.18.0)
     - hermes-engine
@@ -2427,6 +2471,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
+  - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-in-app-review (from `../node_modules/react-native-in-app-review`)
   - react-native-maps (from `../node_modules/react-native-maps`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -2464,6 +2509,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
+  - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - "RNFBAnalytics (from `../node_modules/@react-native-firebase/analytics`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBCrashlytics (from `../node_modules/@react-native-firebase/crashlytics`)"
@@ -2603,6 +2649,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-cookies:
     :path: "../node_modules/@react-native-cookies/cookies"
+  react-native-get-random-values:
+    :path: "../node_modules/react-native-get-random-values"
   react-native-in-app-review:
     :path: "../node_modules/react-native-in-app-review"
   react-native-maps:
@@ -2677,6 +2725,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
+  RNCClipboard:
+    :path: "../node_modules/@react-native-clipboard/clipboard"
   RNFBAnalytics:
     :path: "../node_modules/@react-native-firebase/analytics"
   RNFBApp:
@@ -2777,6 +2827,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 2400756499468284390aee02af83e05acc3b7e6a
   React-microtasksnativemodule: 2bc6328eab685a029a51bcc8d0a254b93dc10585
   react-native-cookies: d648ab7025833b977c0b19e142503034f5f29411
+  react-native-get-random-values: b5c58b0394402d412415337011bb227495a66380
   react-native-in-app-review: 1516ba69d60d58053b7eb3aaaf8d2a5a74af8b57
   react-native-maps: 9febd31278b35cd21e4fad2cf6fa708993be5dab
   react-native-safe-area-context: c5d42c4294aa175415947e23c2ac956253abfc7d
@@ -2815,6 +2866,7 @@ SPEC CHECKSUMS:
   ReactNativeDependencies: 3854fa4300cf7659f4c5b788765cd47a0feb657a
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   RNCAsyncStorage: c8407cc394627a3a4cf56b457d594bfa822b6ab8
+  RNCClipboard: fc456104340b49bdf812f68bd00e764abf360361
   RNFBAnalytics: 98e311ec37825e0b34078dcf74dcbf0b1fecea28
   RNFBApp: a7f7d8958325c68e4b2bdabe8c32e329a1735cb0
   RNFBCrashlytics: 5a6cfdced3ef39203d9da4de092c79bade1ed53d

@@ -1,11 +1,15 @@
 /**
- * Settings is not a sign-in screen, so signing in from it opens the shared
- * `LoginModal` over it rather than navigating anywhere.
+ * Settings is master/detail: wide, the chosen section shows beside the list;
+ * narrow, a section is its own screen. Settings is not a sign-in screen, so
+ * signing in from its Account section opens the shared `LoginModal` over it
+ * rather than navigating anywhere.
  */
 import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { LoginModal } from '@sudobility/components-rn';
 import SettingsScreen from '../SettingsScreen';
+import AccountSection from '../settings/AccountSection';
+import AppearanceSection from '../settings/AppearanceSection';
 import type { SettingsScreenProps } from '@/navigation/types';
 import { trackError, trackEvent } from '@/analytics';
 
@@ -31,6 +35,21 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 jest.mock('@/hooks/useLlmKeys', () => ({
   useLlmKeys: () => ({ effective: [], configured: [] }),
 }));
+// The login web view behind it needs native modules.
+jest.mock('../settings/AddCredentialModal', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+// Agent Email pulls viem/@scure (ESM the jest transform does not cover).
+jest.mock('../settings/AgentEmailSection', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+jest.mock('@/hooks/useSiteBadges', () => ({ useSiteBadges: () => ({}) }));
+jest.mock('@/lib/siteSessions', () => ({
+  signOutOfSite: jest.fn(),
+  signOutOfAllSites: jest.fn(),
+}));
 jest.mock('@/hooks/useTabBarHeight', () => ({ useTabBarHeight: () => 0 }));
 jest.mock('@/i18n', () => ({
   __esModule: true,
@@ -46,9 +65,10 @@ jest.mock('@/analytics', () => ({
 jest.mock('@/config/constants', () => ({
   SUPPORTED_LANGUAGES: ['en'],
   COMPANY_NAME: 'Test',
+  APP_NAME: 'raidr agent',
 }));
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }),
 }));
 jest.mock('@react-navigation/native', () => ({
   useTheme: () => ({ dark: false }),
@@ -56,9 +76,10 @@ jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ canGoBack: () => false, goBack: jest.fn() }),
 }));
 
-const props = {} as SettingsScreenProps;
+const navigate = jest.fn();
+const props = { navigation: { navigate } } as unknown as SettingsScreenProps;
 
-function render(): ReactTestRenderer {
+function renderScreen(): ReactTestRenderer {
   let tree: ReactTestRenderer | undefined;
   act(() => {
     tree = create(<SettingsScreen {...props} />);
@@ -66,7 +87,95 @@ function render(): ReactTestRenderer {
   return tree!;
 }
 
-describe('SettingsScreen sign-in', () => {
+/** Lay the split view out at `width`, as the native layout pass would. */
+function layOut(tree: ReactTestRenderer, width: number): void {
+  const view = tree.root.find(n => n.props.testID === 'split-view');
+  act(() => {
+    view.props.onLayout({ nativeEvent: { layout: { width, height: 800 } } });
+  });
+}
+
+function press(tree: ReactTestRenderer, id: string): void {
+  const entry = tree.root.find(
+    n =>
+      n.props.testID === `split-entry-${id}` &&
+      typeof n.props.onPress === 'function'
+  );
+  act(() => {
+    entry.props.onPress();
+  });
+}
+
+const hasDetail = (tree: ReactTestRenderer) =>
+  tree.root.findAll(n => n.props.testID === 'split-detail').length > 0;
+
+describe('SettingsScreen layout', () => {
+  beforeEach(() => {
+    navigate.mockClear();
+    mockAuth.user = null;
+  });
+
+  it('lists the four sections, then API Keys', () => {
+    const tree = renderScreen();
+    const ids = tree.root
+      .findAll(
+        n =>
+          typeof n.props.testID === 'string' &&
+          n.props.testID.startsWith('split-entry-') &&
+          typeof n.props.onPress === 'function'
+      )
+      .map(n => n.props.testID);
+    expect([...new Set(ids)]).toEqual([
+      'split-entry-account',
+      'split-entry-appearance',
+      'split-entry-credentials',
+      'split-entry-agentEmail',
+      'split-entry-passwords',
+      'split-entry-app',
+      'split-entry-apiKeys',
+    ]);
+  });
+
+  it('pushes a section screen when narrow', () => {
+    const tree = renderScreen();
+    layOut(tree, 390);
+    expect(hasDetail(tree)).toBe(false);
+    press(tree, 'credentials');
+    expect(navigate).toHaveBeenCalledWith('SettingsSection', {
+      section: 'credentials',
+    });
+  });
+
+  it('shows the chosen section beside the list when wide', () => {
+    const tree = renderScreen();
+    layOut(tree, 1024);
+    expect(hasDetail(tree)).toBe(true);
+    expect(tree.root.findAllByType(AccountSection)).toHaveLength(1);
+
+    press(tree, 'appearance');
+    expect(navigate).not.toHaveBeenCalled();
+    expect(tree.root.findAllByType(AccountSection)).toHaveLength(0);
+    expect(tree.root.findAllByType(AppearanceSection)).toHaveLength(1);
+  });
+
+  it('opens API Keys as its own screen in either layout', () => {
+    const tree = renderScreen();
+    layOut(tree, 1024);
+    press(tree, 'apiKeys');
+    expect(navigate).toHaveBeenCalledWith('ApiKeys');
+  });
+});
+
+/** The Account section, where sign-in happens. */
+function render(): ReactTestRenderer {
+  let tree: ReactTestRenderer | undefined;
+  act(() => {
+    tree = create(<AccountSection />);
+  });
+  return tree!;
+}
+
+describe('Account section sign-in', () => {
   beforeEach(() => {
     mockAuth.user = null;
   });

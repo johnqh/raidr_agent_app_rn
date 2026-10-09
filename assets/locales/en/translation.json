@@ -5,7 +5,10 @@
     "cancel": "Cancel",
     "continue": "Continue",
     "delete": "Delete",
-    "back": "Back"
+    "back": "Back",
+    "done": "Done",
+    "copy": "Copy",
+    "copied": "Copied"
   },
   "ask": {
     "title": "Ask",
@@ -83,7 +86,13 @@
     "close": "Close",
     "error": "Could not load sign-in for this site.",
     "popupTitle": "Sign-in window · {{host}}",
-    "closePopup": "Close window"
+    "closePopup": "Close window",
+    "autofill": {
+      "cta": "Use Agent Email",
+      "filled": "Filled the agent email and a generated password. Review the form and continue.",
+      "noFields": "No email or password field was found on this page.",
+      "failed": "Could not prepare the agent email."
+    }
   },
   "results": {
     "title": "Results",
@@ -158,22 +167,100 @@
       "light": "Light",
       "dark": "Dark"
     },
-    "selectTheme": "Select Theme",
     "themeDescription": "App color scheme",
     "language": "Language",
     "languageDescription": "Select your preferred language",
     "account": "Account",
     "signInDescription": "Sync data across devices",
-    "about": "About",
-    "version": "Version 1.0.0",
     "copyright": "2024 {{companyName}}",
-    "agent": "Agent",
     "apiKeys": "API Keys",
     "apiKeysDescription": "Run requests with your own AI provider key",
     "agentMode": {
       "cloud": "Cloud",
       "local": "Local",
       "localWith": "Local · {{provider}}"
+    },
+    "sections": {
+      "account": "Account",
+      "appearance": "Appearance",
+      "credentials": "Credentials",
+      "app": "App Settings",
+      "agentEmail": "Agent Email",
+      "passwords": "Passwords"
+    },
+    "accountEmail": "Email",
+    "accountName": "Name",
+    "credentials": {
+      "description": "Sites you signed in to while running requests. Signing out removes the saved sign-in from this device.",
+      "empty": "You are not signed in to any sites yet.",
+      "signedInAt": "Signed in {{date}}",
+      "signOut": "Sign Out",
+      "signOutTitle": "Sign out of {{domain}}?",
+      "signOutConfirm": "Requests that need {{domain}} will ask you to sign in again.",
+      "signOutAll": "Sign Out of All Sites",
+      "signOutAllConfirm": "You will be signed out of {{count}} sites on this device.",
+      "signOutAllConfirm_one": "You will be signed out of 1 site on this device."
+    },
+    "app": {
+      "empty": "No app settings yet."
+    },
+    "addCredential": {
+      "cta": "Add Credential",
+      "title": "Add Credential",
+      "placeholder": "Search sites by domain",
+      "hint": "Type at least 2 letters of a site's domain.",
+      "noResults": "No sites to sign in to match “{{query}}”.",
+      "error": "Could not search sites. Check your connection and try again.",
+      "alreadySignedIn": "Signed in · sign in again to replace it"
+    },
+    "agentEmail": {
+      "introTitle": "Give your agent an email address",
+      "introBody": "Some sites ask for an email address before they let you in. Create an email address for the agent to use, and the messages those sites send — including sign-in links and verification codes — arrive in an inbox here that you can read. The address is backed by a standard Ethereum key held only on this device.",
+      "create": "Create Email",
+      "error": "Could not set up the agent email",
+      "addressLabel": "Email address",
+      "addressFooter": "Messages sent to this address arrive in the agent's inbox on this device.",
+      "useAutomatically": "Use Agent Email automatically",
+      "useAutomaticallyHint": "When a site asks for an email while signing in, offer to fill in this address. You still submit the form and confirm any verification yourself.",
+      "showSeed": "Show Seed Phrases",
+      "remove": "Remove Email",
+      "removeTitle": "Remove the agent email?",
+      "removeConfirm": "The seed phrase is deleted from this device. Without a backup of it you cannot restore this email or read its past messages.",
+      "restore": {
+        "cta": "Restore Email",
+        "title": "Restore Email",
+        "hint": "Enter the 12-word seed phrase of an agent email to restore its address on this device.",
+        "placeholder": "word1 word2 word3 …",
+        "invalid": "That is not a valid 12-word seed phrase."
+      },
+      "seed": {
+        "title": "Your seed phrase",
+        "warning": "Write these words down and keep them somewhere safe. They are the only way to restore this email, and anyone who has them can read its mail. Never share them.",
+        "saved": "I've saved it",
+        "missing": "No seed phrase is stored on this device.",
+        "copy": "Copy All"
+      },
+      "copyAddress": "Copy"
+    },
+    "passwords": {
+      "empty": "No saved passwords yet. Logins you fill with the agent email appear here, and you can add your own.",
+      "add": "Add Password",
+      "addTitle": "Add Password",
+      "editTitle": "Edit Password",
+      "website": "Website",
+      "email": "Email",
+      "password": "Password",
+      "show": "Show",
+      "hide": "Hide",
+      "generate": "Generate",
+      "save": "Save",
+      "saveError": "Could not save. Check the website, email and password.",
+      "edit": "Edit",
+      "remove": "Remove",
+      "removeTitle": "Remove the saved login for {{domain}}?",
+      "removeConfirm": "The email and password for this site are deleted from this device.",
+      "copyPassword": "Copy Password",
+      "copyEmail": "Copy Email"
     }
   },
   "apiKeys": {

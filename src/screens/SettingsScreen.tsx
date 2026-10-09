@@ -1,127 +1,41 @@
 /**
- * SettingsScreen - App settings and preferences
+ * Settings, as master and detail ({@link SplitView}): Account, Appearance,
+ * Credentials (the sites the user is signed in to) and App settings, then
+ * API Keys. Wide, the chosen section shows beside the list; narrow (a
+ * phone), each section is its own screen (`SettingsSection`).
  *
- * Displays appearance settings (theme), account info with sign-in/sign-out,
- * and about section. Signing in is not this screen's job, so the Account
- * row opens `SignInModal` (the shared `LoginModal`) over it; on success the
- * modal closes and the row shows the signed-in account.
- *
- * Styling comes entirely from the design system: layout via NativeWind
- * `className`, colors via semantic tokens (bg-card, text-foreground,
- * text-muted-foreground, border-border, ...) and `@sudobility/components-rn`
- * components — no StyleSheet colors or hardcoded literals.
+ * API Keys is a screen of its own in either layout (its drag-ordered list
+ * needs the whole screen), so it is a link, not a section.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
-import { View, Pressable, Alert } from 'react-native';
-import Screen from '@/components/layout/Screen';
-import { Text, Spinner } from '@sudobility/components-rn';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import i18n from '@/i18n';
-import { useAuth } from '@/context/AuthContext';
-import { useSettingsStore, type ThemeMode } from '@/stores/settingsStore';
-import { changeLanguage } from '@/i18n';
-import { SUPPORTED_LANGUAGES, COMPANY_NAME } from '@/config/constants';
-import SignInModal from '@/components/SignInModal';
-import type { SettingsScreenProps } from '@/navigation/types';
-import { trackScreenView, trackButtonClick, trackEvent } from '@/analytics';
+import Screen from '@/components/layout/Screen';
+import SplitView, { SplitMenuList } from '@/components/layout/SplitView';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useLlmKeys } from '@/hooks/useLlmKeys';
 import { LLM_PROVIDER_INFO } from '@/config/llmProviders';
+import type { SettingsScreenProps } from '@/navigation/types';
+import { trackButtonClick, trackScreenView } from '@/analytics';
+import {
+  SECTION_LABEL,
+  SETTINGS_SECTIONS,
+  isSettingsSection,
+  type SettingsSectionId,
+} from './settings/sections';
+import SettingsSectionView from './settings/SettingsSectionView';
 
-/** Display names for supported languages (in their native script). */
-const LANGUAGE_LABELS: Record<string, string> = {
-  en: 'English',
-  de: 'Deutsch',
-  es: 'Español',
-  fr: 'Français',
-  it: 'Italiano',
-  ja: '日本語',
-  ko: '한국어',
-  pt: 'Português',
-  ru: 'Русский',
-  sv: 'Svenska',
-  th: 'ไทย',
-  uk: 'Українська',
-  vi: 'Tiếng Việt',
-  zh: '中文(简体)',
-  'zh-Hant': '中文(繁體)',
-};
-
-/** Available theme options for the theme picker. */
-const themes: { value: ThemeMode; label: string }[] = [
-  { value: 'system', label: 'System' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-];
-
-/** A bordered separator between rows inside a settings group. */
-function RowSeparator() {
-  return <View className='h-px ml-4 bg-border' />;
-}
+const API_KEYS = 'apiKeys';
 
 export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { t } = useTranslation();
-  const { user, isLoading: authLoading, signOut } = useAuth();
-  const { theme, setTheme, agentMode } = useSettingsStore();
+  const agentMode = useSettingsStore(s => s.agentMode);
   const { effective } = useLlmKeys();
+  const [chosen, setChosen] = useState<SettingsSectionId>('account');
 
   useEffect(() => {
     trackScreenView('Settings');
   }, []);
-
-  // Sign-in modal state
-  const [showSignIn, setShowSignIn] = useState(false);
-
-  /** Show an alert to pick a theme mode. */
-  const handleThemeChange = useCallback(() => {
-    trackButtonClick('theme_change');
-    const currentIndex = themes.findIndex(th => th.value === theme);
-
-    Alert.alert(t('settings.selectTheme'), undefined, [
-      ...themes.map((th, index) => ({
-        text: `${t(`settings.theme.${th.value}`, th.label)}${
-          index === currentIndex ? ' ✓' : ''
-        }`,
-        onPress: () => setTheme(th.value),
-      })),
-      { text: t('common.cancel'), style: 'cancel' as const },
-    ]);
-  }, [theme, setTheme, t]);
-
-  /** Show an alert to pick a language. */
-  const handleLanguageChange = useCallback(() => {
-    trackButtonClick('language_change');
-    const activeLang = i18n.language;
-    Alert.alert(t('settings.language'), undefined, [
-      ...SUPPORTED_LANGUAGES.map(lang => ({
-        text: `${LANGUAGE_LABELS[lang] ?? lang}${
-          lang === activeLang ? ' ✓' : ''
-        }`,
-        onPress: () => changeLanguage(lang),
-      })),
-      { text: t('common.cancel'), style: 'cancel' as const },
-    ]);
-  }, [t]);
-
-  /** Confirm and execute sign-out. */
-  const handleSignOut = useCallback(async () => {
-    trackButtonClick('sign_out');
-    Alert.alert(t('auth.signOut'), t('auth.signOutConfirm'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('auth.signOut'),
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await signOut();
-            trackEvent('signed_out');
-          } catch (error) {
-            console.error('Sign out error:', error);
-          }
-        },
-      },
-    ]);
-  }, [signOut, t]);
 
   /** "Cloud", or "Local · <provider in use>". */
   const agentModeLabel =
@@ -133,178 +47,37 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
         : t('settings.agentMode.local')
       : t('settings.agentMode.cloud');
 
-  const currentTheme = themes.find(th => th.value === theme)?.label ?? 'System';
+  const entries = [
+    ...SETTINGS_SECTIONS.map(id => ({ id, label: t(SECTION_LABEL[id]) })),
+    { id: API_KEYS, label: t('settings.apiKeys'), value: agentModeLabel },
+  ];
+
+  const choose = (id: string, split: boolean) => {
+    trackButtonClick(`settings_${id}`);
+    if (id === API_KEYS) {
+      navigation.navigate('ApiKeys');
+    } else if (isSettingsSection(id)) {
+      if (split) {
+        setChosen(id);
+      } else {
+        navigation.navigate('SettingsSection', { section: id });
+      }
+    }
+  };
 
   return (
-    <Screen title={t('settings.title')} hideBack>
-      {/* Agent Section */}
-      <View className='mb-7'>
-        <Text
-          size='sm'
-          weight='semibold'
-          color='muted'
-          transform='uppercase'
-          className='mb-2 px-1 tracking-wide'
-        >
-          {t('settings.agent')}
-        </Text>
-        <View className='rounded-lg overflow-hidden bg-card'>
-          <Pressable
-            className='flex-row justify-between items-center py-3 px-4'
-            onPress={() => {
-              trackButtonClick('api_keys');
-              navigation.navigate('ApiKeys');
-            }}
-            accessibilityRole='button'
-            accessibilityLabel={`${t('settings.apiKeys')}: ${agentModeLabel}`}
-            testID='settings-api-keys'
-          >
-            <View className='flex-1 mr-3'>
-              <Text size='base'>{t('settings.apiKeys')}</Text>
-              <Text size='sm' color='muted' className='mt-0.5'>
-                {t('settings.apiKeysDescription')}
-              </Text>
-            </View>
-            <Text size='base' color='muted'>
-              {agentModeLabel}
-            </Text>
-            <Text size='xl' color='muted' className='ml-2'>
-              {'›'}
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Appearance Section */}
-      <View className='mb-7'>
-        <Text
-          size='sm'
-          weight='semibold'
-          color='muted'
-          transform='uppercase'
-          className='mb-2 px-1 tracking-wide'
-        >
-          {t('settings.appearance')}
-        </Text>
-        <View className='rounded-lg overflow-hidden bg-card'>
-          <Pressable
-            className='flex-row justify-between items-center py-3 px-4'
-            onPress={handleThemeChange}
-            accessibilityRole='button'
-            accessibilityLabel={`${t('settings.theme.label')}: ${t(
-              `settings.theme.${theme}`,
-              currentTheme
-            )}`}
-          >
-            <View className='flex-1 mr-3'>
-              <Text size='base'>{t('settings.theme.label')}</Text>
-              <Text size='sm' color='muted' className='mt-0.5'>
-                {t('settings.themeDescription')}
-              </Text>
-            </View>
-            <Text size='base' color='muted'>
-              {t(`settings.theme.${theme}`, currentTheme)}
-            </Text>
-          </Pressable>
-          <RowSeparator />
-          <Pressable
-            className='flex-row justify-between items-center py-3 px-4'
-            onPress={handleLanguageChange}
-            accessibilityRole='button'
-            accessibilityLabel={`${t('settings.language')}: ${
-              LANGUAGE_LABELS[i18n.language] ?? i18n.language
-            }`}
-          >
-            <View className='flex-1 mr-3'>
-              <Text size='base'>{t('settings.language')}</Text>
-              <Text size='sm' color='muted' className='mt-0.5'>
-                {t('settings.languageDescription')}
-              </Text>
-            </View>
-            <Text size='base' color='muted'>
-              {LANGUAGE_LABELS[i18n.language] ?? i18n.language}
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Account Section */}
-      <View className='mb-7'>
-        <Text
-          size='sm'
-          weight='semibold'
-          color='muted'
-          transform='uppercase'
-          className='mb-2 px-1 tracking-wide'
-        >
-          {t('settings.account')}
-        </Text>
-        <View className='rounded-lg overflow-hidden bg-card'>
-          {authLoading ? (
-            <View className='flex-row justify-between items-center py-3 px-4'>
-              <Spinner size='small' />
-            </View>
-          ) : user ? (
-            <View className='flex-row justify-between items-center py-3 px-4'>
-              <View className='flex-1 mr-3'>
-                <Text size='base'>{user.email || t('auth.signedIn')}</Text>
-                <Text size='sm' color='muted' className='mt-0.5'>
-                  {user.displayName || user.uid.substring(0, 8)}
-                </Text>
-              </View>
-              <Pressable
-                onPress={handleSignOut}
-                accessibilityRole='button'
-                accessibilityLabel={t('auth.signOut')}
-              >
-                <Text size='base' color='primary'>
-                  {t('auth.signOut')}
-                </Text>
-              </Pressable>
-            </View>
-          ) : (
-            <Pressable
-              className='flex-row justify-between items-center py-3 px-4'
-              onPress={() => {
-                trackButtonClick('sign_in');
-                setShowSignIn(true);
-              }}
-              accessibilityRole='button'
-              accessibilityLabel={t('auth.signIn')}
-            >
-              <View className='flex-1 mr-3'>
-                <Text size='base'>{t('auth.signIn')}</Text>
-                <Text size='sm' color='muted' className='mt-0.5'>
-                  {t('settings.signInDescription')}
-                </Text>
-              </View>
-              <Text size='xl' color='muted'>
-                {'›'}
-              </Text>
-            </Pressable>
-          )}
-        </View>
-      </View>
-
-      {/* About Section */}
-      <View className='mb-7'>
-        <Text
-          size='sm'
-          weight='semibold'
-          color='muted'
-          transform='uppercase'
-          className='mb-2 px-1 tracking-wide'
-        >
-          {t('settings.about')}
-        </Text>
-        <Text size='sm' color='muted' className='px-1'>
-          {t('settings.version')}
-        </Text>
-        <Text size='xs' color='muted' className='mt-1 px-1'>
-          {t('settings.copyright', { companyName: COMPANY_NAME })}
-        </Text>
-      </View>
-      <SignInModal visible={showSignIn} onClose={() => setShowSignIn(false)} />
+    <Screen title={t('settings.title')} hideBack layout='fill'>
+      <SplitView
+        renderMaster={split => (
+          <SplitMenuList
+            entries={entries}
+            selected={split ? chosen : null}
+            onSelect={id => choose(id, split)}
+          />
+        )}
+        detailTitle={t(SECTION_LABEL[chosen])}
+        detail={<SettingsSectionView section={chosen} />}
+      />
     </Screen>
   );
 }
